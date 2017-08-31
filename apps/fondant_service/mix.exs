@@ -14,7 +14,7 @@ defmodule Fondant.Service.Mixfile do
             build_embedded: Mix.env == :prod,
             start_permanent: Mix.env == :prod,
             aliases: aliases(),
-            deps: deps(),
+            deps: deps(Mix.Project.umbrella?),
             dialyzer: [plt_add_deps: :transitive]
         ]
     end
@@ -46,7 +46,8 @@ defmodule Fondant.Service.Mixfile do
     #   {:my_app, in_umbrella: true}
     #
     # Type "mix help deps" for more examples and options
-    defp deps do
+    defp deps(false), do: deps(true) ++ [{ :fondant_filter, path: "../fondant_filter" }]
+    defp deps(true) do
         [
             { :ecto, "~> 2.1" },
             { :postgrex, "~> 0.13.2" },
@@ -55,6 +56,7 @@ defmodule Fondant.Service.Mixfile do
             { :defecto, github: "ScrimpyCat/Defecto", only: :test }
         ]
     end
+
 
     # Aliases are shortcuts or tasks specific to the current project.
     # For example, to create, migrate and run the seeds file at once:
