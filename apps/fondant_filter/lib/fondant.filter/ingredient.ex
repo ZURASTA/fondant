@@ -19,4 +19,10 @@ defmodule Fondant.Filter.Ingredient do
         :name,
         :type
     ]
+
+    @type t :: %Fondant.Filter.Ingredient{
+        id: String.t,
+        name: String.t,
+        type: String.t
+    }
 end
