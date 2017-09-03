@@ -16,6 +16,8 @@ defmodule Fondant.Service.Filter.Type do
     """
 
     @type locale :: String.t
+    @type page :: integer
+    @type filter :: struct()
 
     @doc """
       Implement the behaviour for retrieving a specific filter of type with
@@ -25,15 +27,27 @@ defmodule Fondant.Service.Filter.Type do
 
       If the operation was successful return `{ :ok, filter }`.
     """
-    @callback get(id :: integer, locale) :: { :ok, filter :: struct() } | { :error, reason :: String.t }
+    @callback get(id :: integer, locale) :: { :ok, filter } | { :error, reason :: String.t }
 
     @doc """
       Implement the behaviour for finding filters that match the given query.
 
-      If the operation was successful return `{ :ok, [filter] }`. Otherwise
-      return the error.
+      Common behaviour is to support an all inclusive search (`:any`), and specific
+      query options for each searchable field.
+
+      Options may be provided to customise the operation. Required options that
+      must be supported are:
+
+      * `:locale` - The localisation `t:Fondant.Service.Filter.Type.locale/0`
+      to be applied for the search (see `Fondant.Service.Locale`).
+      * `:page` - The pagination index to retrieve the results of.
+      * `:limit` - The max number of entries to retrieve.
+
+      If the operation was successful return `{ :ok, { filters, page } }`, where
+      `filters` is the list of filters, and `page` is the next pagination index.
+      Otherwise return the error.
     """
-    @callback find(locale, query :: keyword(String.t), options :: keyword(String.t)) :: { :ok, filters :: [struct()] } | { :error, reason :: String.t }
+    @callback find(query :: keyword(String.t), options :: keyword(any)) :: { :ok, { [filter], page } } | { :error, reason :: String.t }
 
     @doc """
       Implement the behaviour for returning a list of the queryable parameters.
@@ -48,7 +62,7 @@ defmodule Fondant.Service.Filter.Type do
       Returns `{ :ok, filter }` if the operation was successful, otherwise returns
       an error.
     """
-    @spec get(atom, integer, locale) :: { :ok, struct() } | { :error, String.t }
+    @spec get(atom, integer, locale) :: { :ok, filter } | { :error, String.t }
     def get(type, id, locale) do
         atom_to_module(type).get(id, locale)
     end
@@ -56,11 +70,25 @@ defmodule Fondant.Service.Filter.Type do
     @doc """
       Find all filters of type that match the given query.
 
-      Returns `{ :ok, [filter] }` if the operation was successful, otherwise
-      returns an error.
+      The query field accepts any fields returned by
+      `Fondant.Service.Filter.Type.queryables/1`. For more detail on the specific
+      fields, see the type's implementation.
+
+      The options field can specify the `:locale`, `:page`, and `:limit`. Other
+      fields may also be supported, to find details on them see the type's
+      implementation.
+
+      * `:locale` - The localisation `t:Fondant.Service.Filter.Type.locale/0`
+      to be applied for the search (see `Fondant.Service.Locale`).
+      * `:page` - The pagination index to retrieve the results of.
+      * `:limit` - The max number of entries to retrieve.
+
+      Returns `{ :ok, { filters, page } }` if the operation was successful, where
+      `filters` is the list of filters, and `page` is the next pagination index.
+      Otherwise returns an error.
     """
-    @spec find(atom, locale, keyword(String.t), keyword(String.t)) :: { :ok, struct() } | { :error, String.t }
-    def find(type, locale, query, options \\ []) do
+    @spec find(atom, keyword(String.t), keyword(any)) :: { :ok, { [filter], page } } | { :error, String.t }
+    def find(type, query, options \\ []) do
         atom_to_module(type).find(locale, query, options)
     end
 
