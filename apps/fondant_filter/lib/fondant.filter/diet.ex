@@ -17,7 +17,7 @@ defmodule Fondant.Filter.Diet do
     ]
 
     @type t :: %Fondant.Filter.Diet{
-        id: String.t,
+        id: integer,
         name: String.t
     }
 end

@@ -17,7 +17,7 @@ defmodule Fondant.Filter.Allergen do
     ]
 
     @type t :: %Fondant.Filter.Allergen{
-        id: String.t,
+        id: integer,
         name: String.t
     }
 end
