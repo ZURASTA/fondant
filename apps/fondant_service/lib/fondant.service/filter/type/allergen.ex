@@ -55,4 +55,7 @@ defmodule Fondant.Service.Filter.Type.Allergen do
             result -> { :ok, { Enum.map(result, &Map.merge(%Fondant.Filter.Allergen{}, &1)), List.last(result).id } }
         end
     end
+
+    @impl Filter.Type
+    def queryables(), do: [:any, :name]
 end
