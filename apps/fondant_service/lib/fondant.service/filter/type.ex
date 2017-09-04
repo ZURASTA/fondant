@@ -89,7 +89,7 @@ defmodule Fondant.Service.Filter.Type do
     """
     @spec find(atom, keyword(String.t), keyword(any)) :: { :ok, { [filter], page } } | { :error, String.t }
     def find(type, query, options \\ []) do
-        atom_to_module(type).find(locale, query, options)
+        atom_to_module(type).find(query, options)
     end
 
     @doc """
