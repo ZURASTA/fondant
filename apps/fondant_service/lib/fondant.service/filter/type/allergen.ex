@@ -49,9 +49,10 @@ defmodule Fondant.Service.Filter.Type.Allergen do
 
     @impl Filter.Type
     def find(query, options) do
-        case Fondant.Service.Repo.all(query_all(query, Keyword.merge([page: 0], options))) do
+        options = Keyword.merge([page: 0], options)
+        case Fondant.Service.Repo.all(query_all(query, options)) do
             nil -> { :error, "Could not retrieve any allergens" }
-            [] -> { :ok, { [], 0 } }
+            [] -> { :ok, { [], options[:page] } }
             result -> { :ok, { Enum.map(result, &Map.merge(%Fondant.Filter.Allergen{}, &1)), List.last(result).id } }
         end
     end
