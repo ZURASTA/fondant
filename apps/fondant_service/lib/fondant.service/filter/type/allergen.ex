@@ -28,11 +28,11 @@ defmodule Fondant.Service.Filter.Type.Allergen do
     end
 
     defp query_all([{ :any, any }|args], options) do
-        any = any <> "%"
+        any = LikeSanitizer.escape(any) <> "%"
         where(query_all(args, options), [i, n], ilike(n.term, ^any))
     end
     defp query_all([{ :name, name }|args], options) do
-        name = name <> "%"
+        name = LikeSanitizer.escape(name) <> "%"
         where(query_all(args, options), [i, n], ilike(n.term, ^name))
     end
     defp query_all([], options) do
