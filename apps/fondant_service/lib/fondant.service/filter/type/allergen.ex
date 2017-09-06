@@ -14,7 +14,7 @@ defmodule Fondant.Service.Filter.Type.Allergen do
     def get(id, locale) do
         query = from allergen in Allergen.Model,
             where: allergen.id == ^id,
-            locales: ^Fondant.Service.Locale.to_locale_id_list!(locale),
+            locale: ^Fondant.Service.Locale.to_locale_id!(locale),
             translate: name in allergen.name,
             select: %{
                 id: allergen.id,
