@@ -23,7 +23,29 @@ defmodule Fondant.Service.Filter.Type.DietTest do
         foobar = Fondant.Service.Repo.insert!(%Diet.Model{ name: 2 })
         bar = Fondant.Service.Repo.insert!(%Diet.Model{ name: 3 })
 
-        { :ok, %{ foo: foo, foobar: foobar, bar: bar } }
+        {
+            :ok,
+            %{
+                id: %{ foo: foo.id, foobar: foobar.id, bar: bar.id },
+                data: %{
+                    foo: %{
+                        aa: %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa" },
+                        zz: %Fondant.Filter.Diet{ id: foo.id, name: "foo_zz" },
+                        aa_bb: %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa_bb" }
+                    },
+                    foobar: %{
+                        aa: %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_aa" },
+                        zz: %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_zz" },
+                        aa_bb: %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_aa_bb" }
+                    },
+                    bar: %{
+                        aa: %Fondant.Filter.Diet{ id: bar.id, name: "bar_aa" },
+                        zz: %Fondant.Filter.Diet{ id: bar.id, name: "bar_zz" },
+                        aa_bb: %Fondant.Filter.Diet{ id: bar.id, name: "bar_aa_bb" }
+                    }
+                }
+            }
+        }
     end
 
     test "retrieve queryables" do
@@ -45,103 +67,103 @@ defmodule Fondant.Service.Filter.Type.DietTest do
             assert { :error, "Diet does not exist" } == Diet.get(0, "zz_BB")
         end
 
-        test "existing diet", %{ foo: foo, foobar: foobar, bar: bar } do
-            assert { :ok, %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa" } } == Diet.get(foo.id, "aa")
-            assert { :ok, %Fondant.Filter.Diet{ id: foo.id, name: "foo_zz" } } == Diet.get(foo.id, "zz")
-            assert { :ok, %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa_bb" } } == Diet.get(foo.id, "aa_BB")
+        test "existing diet", %{ id: %{ foo: foo_id, foobar: foobar_id, bar: bar_id }, data: diet } do
+            assert { :ok, diet.foo.aa } == Diet.get(foo_id, "aa")
+            assert { :ok, diet.foo.zz } == Diet.get(foo_id, "zz")
+            assert { :ok, diet.foo.aa_bb } == Diet.get(foo_id, "aa_BB")
 
-            assert { :ok, %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_aa" } } == Diet.get(foobar.id, "aa")
-            assert { :ok, %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_zz" } } == Diet.get(foobar.id, "zz")
-            assert { :ok, %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_aa_bb" } } == Diet.get(foobar.id, "aa_BB")
+            assert { :ok, diet.foobar.aa } == Diet.get(foobar_id, "aa")
+            assert { :ok, diet.foobar.zz } == Diet.get(foobar_id, "zz")
+            assert { :ok, diet.foobar.aa_bb } == Diet.get(foobar_id, "aa_BB")
 
-            assert { :ok, %Fondant.Filter.Diet{ id: bar.id, name: "bar_aa" } } == Diet.get(bar.id, "aa")
-            assert { :ok, %Fondant.Filter.Diet{ id: bar.id, name: "bar_zz" } } == Diet.get(bar.id, "zz")
-            assert { :ok, %Fondant.Filter.Diet{ id: bar.id, name: "bar_aa_bb" } } == Diet.get(bar.id, "aa_BB")
+            assert { :ok, diet.bar.aa } == Diet.get(bar_id, "aa")
+            assert { :ok, diet.bar.zz } == Diet.get(bar_id, "zz")
+            assert { :ok, diet.bar.aa_bb } == Diet.get(bar_id, "aa_BB")
         end
     end
 
     describe "find" do
-        test "no queries", %{ foo: foo, foobar: foobar, bar: bar } do
+        test "no queries", %{ id: %{ bar: bar_id }, data: diet } do
             assert { :ok, { results, page } } = Diet.find([], [locale: "aa", limit: 10])
-            assert bar.id == page
+            assert bar_id == page
             assert Enum.sort([
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa" },
-                %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_aa" },
-                %Fondant.Filter.Diet{ id: bar.id, name: "bar_aa" }
+                diet.foo.aa,
+                diet.foobar.aa,
+                diet.bar.aa
             ]) == Enum.sort(results)
 
             assert { :ok, { results, page } } = Diet.find([], [locale: "zz", limit: 10])
-            assert bar.id == page
+            assert bar_id == page
             assert Enum.sort([
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_zz" },
-                %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_zz" },
-                %Fondant.Filter.Diet{ id: bar.id, name: "bar_zz" }
+                diet.foo.zz,
+                diet.foobar.zz,
+                diet.bar.zz
             ]) == Enum.sort(results)
 
             assert { :ok, { results, page } } = Diet.find([], [locale: "aa_BB", limit: 10])
-            assert bar.id == page
+            assert bar_id == page
             assert Enum.sort([
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa" },
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa_bb" },
-                %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_aa" },
-                %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_aa_bb" },
-                %Fondant.Filter.Diet{ id: bar.id, name: "bar_aa" },
-                %Fondant.Filter.Diet{ id: bar.id, name: "bar_aa_bb" }
+                diet.foo.aa,
+                diet.foo.aa_bb,
+                diet.foobar.aa,
+                diet.foobar.aa_bb,
+                diet.bar.aa,
+                diet.bar.aa_bb
             ]) == Enum.sort(results)
         end
 
-        test "pagination", %{ foo: foo, foobar: foobar, bar: bar } do
+        test "pagination", %{ id: %{ foo: foo_id, foobar: foobar_id, bar: bar_id }, data: diet } do
             assert { :ok, { results, page } } = Diet.find([], [locale: "aa", limit: 1])
-            assert foo.id == page
+            assert foo_id == page
             assert [
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa" }
+                diet.foo.aa
             ] == results
 
             assert { :ok, { results, page } } = Diet.find([], [locale: "aa", limit: 1, page: page])
-            assert foobar.id == page
+            assert foobar_id == page
             assert [
-                %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_aa" }
+                diet.foobar.aa
             ] == results
 
             assert { :ok, { results, page } } = Diet.find([], [locale: "aa", limit: 1, page: page])
-            assert bar.id == page
+            assert bar_id == page
             assert [
-                %Fondant.Filter.Diet{ id: bar.id, name: "bar_aa" }
+                diet.bar.aa
             ] == results
 
             assert { :ok, { results, page } } = Diet.find([], [locale: "aa", limit: 1, page: page])
-            assert bar.id == page
+            assert bar_id == page
             assert [] == results
         end
 
-        test "query name", %{ foo: foo, foobar: foobar } do
+        test "query name", %{ id: %{ foo: foo_id, foobar: foobar_id }, data: diet } do
             assert { :ok, { results, page } } = Diet.find([name: "f"], [locale: "aa", limit: 10])
-            assert foobar.id == page
+            assert foobar_id == page
             assert Enum.sort([
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa" },
-                %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_aa" },
+                diet.foo.aa,
+                diet.foobar.aa
             ]) == Enum.sort(results)
 
             assert { :ok, { results, page } } = Diet.find([name: "f"], [locale: "zz", limit: 10])
-            assert foobar.id == page
+            assert foobar_id == page
             assert Enum.sort([
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_zz" },
-                %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_zz" },
+                diet.foo.zz,
+                diet.foobar.zz
             ]) == Enum.sort(results)
 
             assert { :ok, { results, page } } = Diet.find([name: "f"], [locale: "aa_BB", limit: 10])
-            assert foobar.id == page
+            assert foobar_id == page
             assert Enum.sort([
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa" },
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa_bb" },
-                %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_aa" },
-                %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_aa_bb" },
+                diet.foo.aa,
+                diet.foo.aa_bb,
+                diet.foobar.aa,
+                diet.foobar.aa_bb
             ]) == Enum.sort(results)
 
             assert { :ok, { results, page } } = Diet.find([name: "foo_a"], [locale: "aa", limit: 10])
-            assert foo.id == page
+            assert foo_id == page
             assert [
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa" }
+                diet.foo.aa
             ] == results
 
             assert { :ok, { results, page } } = Diet.find([name: "foo_a"], [locale: "zz", limit: 10])
@@ -149,10 +171,10 @@ defmodule Fondant.Service.Filter.Type.DietTest do
             assert [] == results
 
             assert { :ok, { results, page } } = Diet.find([name: "foo_a"], [locale: "aa_BB", limit: 10])
-            assert foo.id == page
+            assert foo_id == page
             assert Enum.sort([
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa" },
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa_bb" }
+                diet.foo.aa,
+                diet.foo.aa_bb
             ]) == Enum.sort(results)
 
             assert { :ok, { results, page } } = Diet.find([name: "barfoo"], [locale: "aa", limit: 10])
@@ -180,34 +202,34 @@ defmodule Fondant.Service.Filter.Type.DietTest do
             assert [] == results
         end
 
-        test "query any", %{ foo: foo, foobar: foobar } do
+        test "query any", %{ id: %{ foo: foo_id, foobar: foobar_id }, data: diet } do
             assert { :ok, { results, page } } = Diet.find([any: "f"], [locale: "aa", limit: 10])
-            assert foobar.id == page
+            assert foobar_id == page
             assert Enum.sort([
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa" },
-                %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_aa" },
+                diet.foo.aa,
+                diet.foobar.aa
             ]) == Enum.sort(results)
 
             assert { :ok, { results, page } } = Diet.find([any: "f"], [locale: "zz", limit: 10])
-            assert foobar.id == page
+            assert foobar_id == page
             assert Enum.sort([
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_zz" },
-                %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_zz" },
+                diet.foo.zz,
+                diet.foobar.zz
             ]) == Enum.sort(results)
 
             assert { :ok, { results, page } } = Diet.find([any: "f"], [locale: "aa_BB", limit: 10])
-            assert foobar.id == page
+            assert foobar_id == page
             assert Enum.sort([
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa" },
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa_bb" },
-                %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_aa" },
-                %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_aa_bb" },
+                diet.foo.aa,
+                diet.foo.aa_bb,
+                diet.foobar.aa,
+                diet.foobar.aa_bb
             ]) == Enum.sort(results)
 
             assert { :ok, { results, page } } = Diet.find([any: "foo_a"], [locale: "aa", limit: 10])
-            assert foo.id == page
+            assert foo_id == page
             assert [
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa" }
+                diet.foo.aa
             ] == results
 
             assert { :ok, { results, page } } = Diet.find([any: "foo_a"], [locale: "zz", limit: 10])
@@ -215,10 +237,10 @@ defmodule Fondant.Service.Filter.Type.DietTest do
             assert [] == results
 
             assert { :ok, { results, page } } = Diet.find([any: "foo_a"], [locale: "aa_BB", limit: 10])
-            assert foo.id == page
+            assert foo_id == page
             assert Enum.sort([
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa" },
-                %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa_bb" }
+                diet.foo.aa,
+                diet.foo.aa_bb
             ]) == Enum.sort(results)
 
             assert { :ok, { results, page } } = Diet.find([any: "barfoo"], [locale: "aa", limit: 10])
@@ -246,11 +268,11 @@ defmodule Fondant.Service.Filter.Type.DietTest do
             assert [] == results
         end
 
-        test "all queries", %{ foobar: foobar } do
+        test "all queries", %{ id: %{ foobar: foobar_id }, data: diet } do
             assert { :ok, { results, page } } = Diet.find([name: "f", any: "foob"], [locale: "aa", limit: 10])
-            assert foobar.id == page
+            assert foobar_id == page
             assert [
-                %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_aa" },
+                diet.foobar.aa
             ] == results
 
             assert { :ok, { results, page } } = Diet.find([name: "f", any: "bar"], [locale: "zz", limit: 10])
