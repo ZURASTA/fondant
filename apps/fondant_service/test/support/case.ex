@@ -21,8 +21,6 @@ defmodule Fondant.Service.Case do
             Ecto.Adapters.SQL.Sandbox.mode(Fondant.Service.Repo, { :shared, self() })
         end
 
-        :timer.sleep(100)
-
         :ok
     end
 end
