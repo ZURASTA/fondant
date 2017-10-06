@@ -28,7 +28,8 @@ defmodule Fondant.Service do
         end
 
         children = [
-            Fondant.Service.Repo
+            Fondant.Service.Repo,
+            Fondant.Service.Filter
         ]
 
         opts = [strategy: :one_for_one, name: Fondant.Service.Supervisor]
