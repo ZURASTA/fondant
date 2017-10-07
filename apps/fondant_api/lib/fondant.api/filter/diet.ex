@@ -1,4 +1,8 @@
 defmodule Fondant.API.Filter.Diet do
+    @moduledoc """
+      Discover dietary filters.
+    """
+
     @service Fondant.Service.Filter
     @filter_type :diet
 
