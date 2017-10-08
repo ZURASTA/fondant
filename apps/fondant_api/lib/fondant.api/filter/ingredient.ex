@@ -1,6 +1,6 @@
 defmodule Fondant.API.Filter.Ingredient do
     @moduledoc """
-      Discover ingredientary filters.
+      Discover ingredient filters.
     """
 
     @service Fondant.Service.Filter
