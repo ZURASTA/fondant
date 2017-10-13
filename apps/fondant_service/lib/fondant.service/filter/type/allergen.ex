@@ -36,7 +36,7 @@ defmodule Fondant.Service.Filter.Type.Allergen do
         where(query_all(args, options), [i, n], ilike(n.term, ^name))
     end
     defp query_all([], options) do
-        from allergen in Fondant.Service.Filter.Type.Allergen.Model,
+        from allergen in Allergen.Model,
             locales: ^Fondant.Service.Locale.to_locale_id_list!(options[:locale]),
             translate: name in allergen.name,
             limit: ^options[:limit],

@@ -36,7 +36,7 @@ defmodule Fondant.Service.Filter.Type.Diet do
         where(query_all(args, options), [i, n], ilike(n.term, ^name))
     end
     defp query_all([], options) do
-        from diet in Fondant.Service.Filter.Type.Diet.Model,
+        from diet in Diet.Model,
             locales: ^Fondant.Service.Locale.to_locale_id_list!(options[:locale]),
             translate: name in diet.name,
             limit: ^options[:limit],

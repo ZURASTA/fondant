@@ -45,7 +45,7 @@ defmodule Fondant.Service.Filter.Type.Ingredient do
         where(query_all(args, options), [i, n, t], ilike(t.term, ^type))
     end
     defp query_all([], options) do
-        from ingredient in Fondant.Service.Filter.Type.Ingredient.Model,
+        from ingredient in Ingredient.Model,
             locales: ^Fondant.Service.Locale.to_locale_id_list!(options[:locale]),
             translate: name in ingredient.name,
             translate: type in ingredient.type,
