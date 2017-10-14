@@ -28,6 +28,7 @@ defmodule Fondant.API.Filter.Ingredient do
 
       * ':any' - Search all fields
       * `:name` - Search all ingredient names
+      * `:type` - Search all ingredient types
 
       The options field accepts:
 
