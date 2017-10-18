@@ -51,7 +51,7 @@ defmodule Fondant.Service.Filter.Type.Ingredient do
             translate: type in ingredient.type,
             limit: ^options[:limit],
             where: ingredient.id > ^options[:page],
-            where: name.locale_id == type.locale_id,
+            locale_match: [name, type],
             select: %{
                 id: ingredient.id,
                 name: name.term,

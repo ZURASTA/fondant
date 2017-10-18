@@ -67,6 +67,7 @@ defmodule Fondant.Service.Filter.Type.Cuisine.Region do
             translate: province in region.province,
             limit: ^options[:limit],
             where: region.id > ^options[:page],
+            locale_match: [continent, subregion, country, province],
             select: %{
                 id: region.id,
                 continent: continent.term,
