@@ -8,16 +8,16 @@ defmodule Fondant.Filter.Cuisine.Region do
       Is the unique id to reference this filter. Is an `integer`.
 
       ###:continent
-      Is the localised continent of the cuisin region. Is a `string`.
+      Is the localised continent of the cuisine region. Is a `string`.
 
       ###:subregion
-      Is the localised subregion of the cuisin region. Is a `string`.
+      Is the localised subregion of the cuisine region. Is a `string`.
 
       ###:country
-      Is the localised country of the cuisin region. Is a `string`.
+      Is the localised country of the cuisine region. Is a `string`.
 
       ###:province
-      Is the localised province of the cuisin region. Is a `string`.
+      Is the localised province of the cuisine region. Is a `string`.
     """
 
     defstruct [
