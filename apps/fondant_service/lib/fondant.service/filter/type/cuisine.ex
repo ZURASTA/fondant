@@ -35,7 +35,7 @@ defmodule Fondant.Service.Filter.Type.Cuisine do
 
         case Fondant.Service.Repo.one(query) do
             nil -> { :error, "Cuisine does not exist" }
-            result -> { :ok, Map.merge(%Fondant.Filter.Cuisine{}, result) }
+            result -> { :ok, Map.merge(%Fondant.Filter.Cuisine{}, %{ result | region: Map.merge(%Fondant.Filter.Cuisine.Region{}, result.region) }) }
         end
     end
 
@@ -93,7 +93,7 @@ defmodule Fondant.Service.Filter.Type.Cuisine do
         case Fondant.Service.Repo.all(query_all(query, options)) do
             nil -> { :error, "Could not retrieve any cuisines" }
             [] -> { :ok, { [], options[:page] } }
-            result -> { :ok, { Enum.map(result, &Map.merge(%Fondant.Filter.Cuisine{}, &1)), List.last(result).id } }
+            result -> { :ok, { Enum.map(result, &Map.merge(%Fondant.Filter.Cuisine{}, %{ &1 | region: Map.merge(%Fondant.Filter.Cuisine.Region{}, &1.region) })), List.last(result).id } }
         end
     end
 
