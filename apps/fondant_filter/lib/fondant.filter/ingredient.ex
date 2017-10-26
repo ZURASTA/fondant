@@ -10,7 +10,7 @@ defmodule Fondant.Filter.Ingredient do
       ###:name
       Is the localised name of the ingredient. Is a `string`.
 
-      ###:name
+      ###:type
       Is the localised category type of the ingredient. Is a `string`.
     """
 
