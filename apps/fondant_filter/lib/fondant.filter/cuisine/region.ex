@@ -31,8 +31,8 @@ defmodule Fondant.Filter.Cuisine.Region do
     @type t :: %Fondant.Filter.Cuisine.Region{
         id: integer,
         continent: String.t,
-        subregion: String.t,
-        country: String.t,
-        province: String.t
+        subregion: String.t | nil,
+        country: String.t | nil,
+        province: String.t | nil
     }
 end
