@@ -12,20 +12,24 @@ defmodule Fondant.Service.Filter.Type.Ingredient do
 
     @impl Filter.Type
     def get(id, locale) do
-        query = from ingredient in Ingredient.Model,
-            where: ingredient.id == ^id,
-            locale: ^Fondant.Service.Locale.to_locale_id!(locale),
-            translate: name in ingredient.name,
-            translate: type in ingredient.type,
-            select: %{
-                id: ingredient.id,
-                name: name.term,
-                type: type.term
-            }
+        case Fondant.Service.Locale.to_locale_id(locale) do
+            nil -> { :error, "Invalid locale" }
+            locale ->
+                query = from ingredient in Ingredient.Model,
+                    where: ingredient.id == ^id,
+                    locale: ^locale,
+                    translate: name in ingredient.name,
+                    translate: type in ingredient.type,
+                    select: %{
+                        id: ingredient.id,
+                        name: name.term,
+                        type: type.term
+                    }
 
-        case Fondant.Service.Repo.one(query) do
-            nil -> { :error, "Ingredient does not exist" }
-            result -> { :ok, Map.merge(%Fondant.Filter.Ingredient{}, result) }
+                case Fondant.Service.Repo.one(query) do
+                    nil -> { :error, "Ingredient does not exist" }
+                    result -> { :ok, Map.merge(%Fondant.Filter.Ingredient{}, result) }
+                end
         end
     end
 
@@ -46,7 +50,7 @@ defmodule Fondant.Service.Filter.Type.Ingredient do
     end
     defp query_all([], options) do
         from ingredient in Ingredient.Model,
-            locales: ^Fondant.Service.Locale.to_locale_id_list!(options[:locale]),
+            locales: ^options[:locale],
             translate: name in ingredient.name,
             translate: type in ingredient.type,
             limit: ^options[:limit],
@@ -61,11 +65,19 @@ defmodule Fondant.Service.Filter.Type.Ingredient do
 
     @impl Filter.Type
     def find(query, options) do
-        options = Keyword.merge([page: 0], options)
-        case Fondant.Service.Repo.all(query_all(query, options)) do
-            nil -> { :error, "Could not retrieve any ingredients" }
-            [] -> { :ok, { [], options[:page] } }
-            result -> { :ok, { Enum.map(result, &Map.merge(%Fondant.Filter.Ingredient{}, &1)), List.last(result).id } }
+        case Keyword.pop(options, :locale) do
+            { nil, _ } -> { :error, "No locale provided" }
+            { locale, options } ->
+                case Fondant.Service.Locale.to_locale_id_list(locale) do
+                    [] -> { :error, "Invalid locale" }
+                    locale ->
+                        options = Keyword.merge([page: 0], [{ :locale, locale }|options])
+                        case Fondant.Service.Repo.all(query_all(query, options)) do
+                            nil -> { :error, "Could not retrieve any ingredients" }
+                            [] -> { :ok, { [], options[:page] } }
+                            result -> { :ok, { Enum.map(result, &Map.merge(%Fondant.Filter.Ingredient{}, &1)), List.last(result).id } }
+                        end
+                end
         end
     end
 

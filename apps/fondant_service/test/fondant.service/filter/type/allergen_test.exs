@@ -60,7 +60,7 @@ defmodule Fondant.Service.Filter.Type.AllergenTest do
         end
 
         test "non-existent locale" do
-            assert_raise Fondant.Service.Locale.NotFoundError, fn -> Allergen.get(0, "bb") end
+            assert { :error, "Invalid locale" } == Allergen.get(0, "bb")
         end
 
         test "non-existent translation" do
@@ -83,6 +83,11 @@ defmodule Fondant.Service.Filter.Type.AllergenTest do
     end
 
     describe "find" do
+        test "non-existent locale" do
+            assert { :error, "No locale provided" } == Allergen.find([], [])
+            assert { :error, "Invalid locale" } == Allergen.find([], [locale: "bb"])
+        end
+
         test "no queries", %{ id: %{ bar: bar_id }, data: allergen } do
             assert { :ok, { results, page } } = Allergen.find([], [locale: "aa", limit: 10])
             assert bar_id == page

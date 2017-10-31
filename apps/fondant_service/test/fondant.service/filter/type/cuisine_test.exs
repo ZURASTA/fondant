@@ -106,7 +106,7 @@ defmodule Fondant.Service.Filter.Type.CuisineTest do
         end
 
         test "non-existent locale" do
-            assert_raise Fondant.Service.Locale.NotFoundError, fn -> Cuisine.get(0, "bb") end
+            assert { :error, "Invalid locale" } == Cuisine.get(0, "bb")
         end
 
         test "non-existent translation" do
@@ -129,6 +129,11 @@ defmodule Fondant.Service.Filter.Type.CuisineTest do
     end
 
     describe "find" do
+        test "non-existent locale" do
+            assert { :error, "No locale provided" } == Cuisine.find([], [])
+            assert { :error, "Invalid locale" } == Cuisine.find([], [locale: "bb"])
+        end
+
         test "no queries", %{ id: %{ bar: bar_id }, data: cuisine } do
             assert { :ok, { results, page } } = Cuisine.find([], [locale: "aa", limit: 10])
             assert bar_id == page

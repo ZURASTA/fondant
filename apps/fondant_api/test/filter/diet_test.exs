@@ -59,9 +59,9 @@ defmodule Fondant.API.Filter.DietTest do
             assert { :error, "Diet does not exist" } == Diet.get(0, "aa_BB")
         end
 
-        # test "non-existent locale" do
-        #     assert_raise Fondant.Service.Locale.NotFoundError, fn -> Diet.get(0, "bb") end
-        # end
+        test "non-existent locale" do
+            assert { :error, "Invalid locale" } == Diet.get(0, "bb")
+        end
 
         test "non-existent translation" do
             assert { :error, "Diet does not exist" } == Diet.get(0, "zz_BB")
@@ -83,6 +83,11 @@ defmodule Fondant.API.Filter.DietTest do
     end
 
     describe "find" do
+        test "non-existent locale" do
+            assert { :error, "No locale provided" } == Diet.find([], [])
+            assert { :error, "Invalid locale" } == Diet.find([], [locale: "bb"])
+        end
+
         test "no queries", %{ id: %{ bar: bar_id }, data: diet } do
             assert { :ok, { results, page } } = Diet.find([], [locale: "aa", limit: 10])
             assert bar_id == page

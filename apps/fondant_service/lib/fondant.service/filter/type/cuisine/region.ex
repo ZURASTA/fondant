@@ -12,24 +12,28 @@ defmodule Fondant.Service.Filter.Type.Cuisine.Region do
 
     @impl Filter.Type
     def get(id, locale) do
-        query = from region in Region.Model,
-            where: region.id == ^id,
-            locale: ^Fondant.Service.Locale.to_locale_id!(locale),
-            translate: continent in region.continent,
-            translate: subregion in region.subregion,
-            translate: country in region.country,
-            translate: province in region.province,
-            select: %{
-                id: region.id,
-                continent: continent.term,
-                subregion: subregion.term,
-                country: country.term,
-                province: province.term
-            }
+        case Fondant.Service.Locale.to_locale_id(locale) do
+            nil -> { :error, "Invalid locale" }
+            locale ->
+                query = from region in Region.Model,
+                    where: region.id == ^id,
+                    locale: ^locale,
+                    translate: continent in region.continent,
+                    translate: subregion in region.subregion,
+                    translate: country in region.country,
+                    translate: province in region.province,
+                    select: %{
+                        id: region.id,
+                        continent: continent.term,
+                        subregion: subregion.term,
+                        country: country.term,
+                        province: province.term
+                    }
 
-        case Fondant.Service.Repo.one(query) do
-            nil -> { :error, "Region does not exist" }
-            result -> { :ok, Map.merge(%Fondant.Filter.Cuisine.Region{}, result) }
+                case Fondant.Service.Repo.one(query) do
+                    nil -> { :error, "Region does not exist" }
+                    result -> { :ok, Map.merge(%Fondant.Filter.Cuisine.Region{}, result) }
+                end
         end
     end
 
@@ -60,7 +64,7 @@ defmodule Fondant.Service.Filter.Type.Cuisine.Region do
     end
     defp query_all([], options) do
         from region in Region.Model,
-            locales: ^Fondant.Service.Locale.to_locale_id_list!(options[:locale]),
+            locales: ^options[:locale],
             translate: continent in region.continent,
             translate: subregion in region.subregion,
             translate: country in region.country,
@@ -79,11 +83,19 @@ defmodule Fondant.Service.Filter.Type.Cuisine.Region do
 
     @impl Filter.Type
     def find(query, options) do
-        options = Keyword.merge([page: 0], options)
-        case Fondant.Service.Repo.all(query_all(query, options)) do
-            nil -> { :error, "Could not retrieve any regions" }
-            [] -> { :ok, { [], options[:page] } }
-            result -> { :ok, { Enum.map(result, &Map.merge(%Fondant.Filter.Cuisine.Region{}, &1)), List.last(result).id } }
+        case Keyword.pop(options, :locale) do
+            { nil, _ } -> { :error, "No locale provided" }
+            { locale, options } ->
+                case Fondant.Service.Locale.to_locale_id_list(locale) do
+                    [] -> { :error, "Invalid locale" }
+                    locale ->
+                        options = Keyword.merge([page: 0], [{ :locale, locale }|options])
+                        case Fondant.Service.Repo.all(query_all(query, options)) do
+                            nil -> { :error, "Could not retrieve any regions" }
+                            [] -> { :ok, { [], options[:page] } }
+                            result -> { :ok, { Enum.map(result, &Map.merge(%Fondant.Filter.Cuisine.Region{}, &1)), List.last(result).id } }
+                        end
+                end
         end
     end
 

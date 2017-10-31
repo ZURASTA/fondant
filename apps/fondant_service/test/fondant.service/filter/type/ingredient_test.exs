@@ -70,7 +70,7 @@ defmodule Fondant.Service.Filter.Type.IngredientTest do
         end
 
         test "non-existent locale" do
-            assert_raise Fondant.Service.Locale.NotFoundError, fn -> Ingredient.get(0, "bb") end
+            assert { :error, "Invalid locale" } == Ingredient.get(0, "bb")
         end
 
         test "non-existent translation" do
@@ -93,6 +93,11 @@ defmodule Fondant.Service.Filter.Type.IngredientTest do
     end
 
     describe "find" do
+        test "non-existent locale" do
+            assert { :error, "No locale provided" } == Ingredient.find([], [])
+            assert { :error, "Invalid locale" } == Ingredient.find([], [locale: "bb"])
+        end
+
         test "no queries", %{ id: %{ bar: bar_id }, data: ingredient } do
             assert { :ok, { results, page } } = Ingredient.find([], [locale: "aa", limit: 10])
             assert bar_id == page
