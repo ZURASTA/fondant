@@ -32,7 +32,7 @@ defmodule Fondant.API.Filter.Ingredient do
 
       The options field accepts:
 
-      * `:locale` - The localisation `t:Fondant.Service.Filter.Type.locale/0`
+      * `:locale` - The localisation `t:Fondant.API.Filter.locale/0`
       to be applied for the search (see `Fondant.Service.Locale`).
       * `:page` - The pagination index to retrieve the results of.
       * `:limit` - The max number of entries to retrieve.
