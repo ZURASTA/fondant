@@ -4,7 +4,7 @@ defmodule Fondant.API.Filter.Cuisine.Region do
     """
 
     @service Fondant.Service.Filter
-    @filter_type :region
+    @filter_type :"cuisine.region"
 
     alias Fondant.API.Filter
 
