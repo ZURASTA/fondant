@@ -7,4 +7,8 @@
   "poolboy": {:hex, :poolboy, "1.5.1", "6b46163901cfd0a1b43d692657ed9d7e599853b3b21b95ae5ae0a777cf9b6ca8", [], [], "hexpm"},
   "postgrex": {:hex, :postgrex, "0.13.3", "c277cfb2a9c5034d445a722494c13359e361d344ef6f25d604c2353185682bfc", [], [{:connection, "~> 1.0", [hex: :connection, repo: "hexpm", optional: false]}, {:db_connection, "~> 1.1", [hex: :db_connection, repo: "hexpm", optional: false]}, {:decimal, "~> 1.0", [hex: :decimal, repo: "hexpm", optional: false]}], "hexpm"},
   "protecto": {:git, "https://github.com/ScrimpyCat/Protecto.git", "4047f5a7699b93136d7852a5db64e1e2096c193f", []},
-  "translecto": {:hex, :translecto, "0.3.1", "4556091244ce1c890b83a452c742b1f1272522fab751039ba78d10e247904883", [:mix], [{:ecto, "~> 2.0", [hex: :ecto, repo: "hexpm", optional: false]}], "hexpm"}}
+  "toml_elixir": {:hex, :toml_elixir, "1.1.0", "ae0b11a77328e3a42dfb260939099f5d3aa5d424b29e444c0b1e203faa994fc3", [], [], "hexpm"},
+  "translecto": {:hex, :translecto, "0.3.1", "4556091244ce1c890b83a452c742b1f1272522fab751039ba78d10e247904883", [:mix], [{:ecto, "~> 2.0", [hex: :ecto, repo: "hexpm", optional: false]}], "hexpm"},
+  "yamerl": {:hex, :yamerl, "0.6.0", "5cb124a01a66418d7d8f2382948c89b48c1764079798eaeb9b578ddb3c7dc58b", [], [], "hexpm"},
+  "yaml_elixir": {:hex, :yaml_elixir, "1.3.1", "b84b6333343b0cba176c43c463e622f838825e7476e35334f719b83df4535bff", [], [{:yamerl, "~> 0.5", [hex: :yamerl, repo: "hexpm", optional: false]}], "hexpm"},
+  "yum": {:git, "https://github.com/ZURASTA/yum.git", "55de01cb4b5d4925a83cdb2327820185617e6781", []}}

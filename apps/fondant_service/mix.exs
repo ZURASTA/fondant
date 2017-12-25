@@ -53,6 +53,7 @@ defmodule Fondant.Service.Mixfile do
             { :postgrex, "~> 0.13.2" },
             { :translecto, "~> 0.3.1" },
             { :like_sanitizer, "~> 0.1" },
+            { :yum, github: "ZURASTA/yum" },
             { :protecto, github: "ScrimpyCat/Protecto" },
             { :defecto, github: "ScrimpyCat/Defecto", only: :test }
         ]
