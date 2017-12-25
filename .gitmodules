@@ -1,0 +1,3 @@
+[submodule "apps/fondant_service/priv/data"]
+	path = apps/fondant_service/priv/data
+	url = https://github.com/ZURASTA/Food-Data.git
