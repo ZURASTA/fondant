@@ -19,9 +19,9 @@ defmodule Fondant.Service.Filter.Type.DietTest do
         Fondant.Service.Repo.insert!(%Diet.Translation.Name.Model{ translate_id: 3, locale_id: zz.id, term: "bar_zz" })
         Fondant.Service.Repo.insert!(%Diet.Translation.Name.Model{ translate_id: 3, locale_id: aa_bb.id, term: "bar_aa_bb" })
 
-        foo = Fondant.Service.Repo.insert!(%Diet.Model{ name: 1 })
-        foobar = Fondant.Service.Repo.insert!(%Diet.Model{ name: 2 })
-        bar = Fondant.Service.Repo.insert!(%Diet.Model{ name: 3 })
+        foo = Fondant.Service.Repo.insert!(%Diet.Model{ ref: "foo", ref_id: Ecto.UUID.generate(), name: 1 })
+        foobar = Fondant.Service.Repo.insert!(%Diet.Model{ ref: "foobar", ref_id: Ecto.UUID.generate(), name: 2 })
+        bar = Fondant.Service.Repo.insert!(%Diet.Model{ ref: "bar", ref_id: Ecto.UUID.generate(), name: 3 })
 
         {
             :ok,

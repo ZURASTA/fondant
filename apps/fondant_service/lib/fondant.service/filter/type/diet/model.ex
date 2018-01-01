@@ -10,11 +10,19 @@ defmodule Fondant.Service.Filter.Type.Diet.Model do
       ###:id
       Is the unique reference to the diet entry. Is an `integer`.
 
+      ###:ref
+      Is the name of the resource. Is a `string`.
+
+      ###:ref_id
+      Is the unique ID to externally reference the diet. Is an `uuid`.
+
       ###:name
       Is the name of the diet. Is a `translatable`.
     """
 
     schema "diets" do
+        field :ref, :string
+        field :ref_id, Ecto.UUID
         translatable :name, Fondant.Service.Filter.Type.Diet.Translation.Name.Model
         timestamps()
     end
@@ -24,13 +32,19 @@ defmodule Fondant.Service.Filter.Type.Diet.Model do
 
       Enforces:
       * `name` field is translatable
+      * `ref` field is required
+      * `ref_id` field is required
       * `name` field is required
+      * `ref` field is unique
+      * `ref_id` field is unique
       * `name` field is unique
     """
     def changeset(struct, params \\ %{}) do
         struct
-        |> translatable_changeset(params, [:name])
-        |> validate_required([:name])
+        |> translatable_changeset(params, [:ref, :ref_id, :name])
+        |> validate_required([:ref, :ref_id, :name])
+        |> unique_constraint(:ref)
+        |> unique_constraint(:ref_id)
         |> unique_constraint(:name)
     end
 end
