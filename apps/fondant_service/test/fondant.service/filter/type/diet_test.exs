@@ -26,22 +26,23 @@ defmodule Fondant.Service.Filter.Type.DietTest do
         {
             :ok,
             %{
-                id: %{ foo: foo.id, foobar: foobar.id, bar: bar.id },
+                id: %{ foo: foo.ref_id, foobar: foobar.ref_id, bar: bar.ref_id },
+                page: %{ foo: foo.id, foobar: foobar.id, bar: bar.id },
                 data: %{
                     foo: %{
-                        aa: %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa" },
-                        zz: %Fondant.Filter.Diet{ id: foo.id, name: "foo_zz" },
-                        aa_bb: %Fondant.Filter.Diet{ id: foo.id, name: "foo_aa_bb" }
+                        aa: %Fondant.Filter.Diet{ id: foo.ref_id, name: "foo_aa" },
+                        zz: %Fondant.Filter.Diet{ id: foo.ref_id, name: "foo_zz" },
+                        aa_bb: %Fondant.Filter.Diet{ id: foo.ref_id, name: "foo_aa_bb" }
                     },
                     foobar: %{
-                        aa: %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_aa" },
-                        zz: %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_zz" },
-                        aa_bb: %Fondant.Filter.Diet{ id: foobar.id, name: "foobar_aa_bb" }
+                        aa: %Fondant.Filter.Diet{ id: foobar.ref_id, name: "foobar_aa" },
+                        zz: %Fondant.Filter.Diet{ id: foobar.ref_id, name: "foobar_zz" },
+                        aa_bb: %Fondant.Filter.Diet{ id: foobar.ref_id, name: "foobar_aa_bb" }
                     },
                     bar: %{
-                        aa: %Fondant.Filter.Diet{ id: bar.id, name: "bar_aa" },
-                        zz: %Fondant.Filter.Diet{ id: bar.id, name: "bar_zz" },
-                        aa_bb: %Fondant.Filter.Diet{ id: bar.id, name: "bar_aa_bb" }
+                        aa: %Fondant.Filter.Diet{ id: bar.ref_id, name: "bar_aa" },
+                        zz: %Fondant.Filter.Diet{ id: bar.ref_id, name: "bar_zz" },
+                        aa_bb: %Fondant.Filter.Diet{ id: bar.ref_id, name: "bar_aa_bb" }
                     }
                 }
             }
@@ -54,17 +55,17 @@ defmodule Fondant.Service.Filter.Type.DietTest do
 
     describe "get" do
         test "non-existent diet" do
-            assert { :error, "Diet does not exist" } == Diet.get(0, "aa")
-            assert { :error, "Diet does not exist" } == Diet.get(0, "zz")
-            assert { :error, "Diet does not exist" } == Diet.get(0, "aa_BB")
+            assert { :error, "Diet does not exist" } == Diet.get(<<0 :: 128>>, "aa")
+            assert { :error, "Diet does not exist" } == Diet.get(<<0 :: 128>>, "zz")
+            assert { :error, "Diet does not exist" } == Diet.get(<<0 :: 128>>, "aa_BB")
         end
 
         test "non-existent locale" do
-            assert { :error, "Invalid locale" } == Diet.get(0, "bb")
+            assert { :error, "Invalid locale" } == Diet.get(<<0 :: 128>>, "bb")
         end
 
         test "non-existent translation" do
-            assert { :error, "Diet does not exist" } == Diet.get(0, "zz_BB")
+            assert { :error, "Diet does not exist" } == Diet.get(<<0 :: 128>>, "zz_BB")
         end
 
         test "existing diet", %{ id: %{ foo: foo_id, foobar: foobar_id, bar: bar_id }, data: diet } do
@@ -88,7 +89,7 @@ defmodule Fondant.Service.Filter.Type.DietTest do
             assert { :error, "Invalid locale" } == Diet.find([], [locale: "bb"])
         end
 
-        test "no queries", %{ id: %{ bar: bar_id }, data: diet } do
+        test "no queries", %{ page: %{ bar: bar_id }, data: diet } do
             assert { :ok, { results, page } } = Diet.find([], [locale: "aa", limit: 10])
             assert bar_id == page
             assert Enum.sort([
@@ -117,7 +118,7 @@ defmodule Fondant.Service.Filter.Type.DietTest do
             ]) == Enum.sort(results)
         end
 
-        test "pagination", %{ id: %{ foo: foo_id, foobar: foobar_id, bar: bar_id }, data: diet } do
+        test "pagination", %{ page: %{ foo: foo_id, foobar: foobar_id, bar: bar_id }, data: diet } do
             assert { :ok, { results, page } } = Diet.find([], [locale: "aa", limit: 1])
             assert foo_id == page
             assert [
@@ -141,7 +142,7 @@ defmodule Fondant.Service.Filter.Type.DietTest do
             assert [] == results
         end
 
-        test "query name", %{ id: %{ foo: foo_id, foobar: foobar_id }, data: diet } do
+        test "query name", %{ page: %{ foo: foo_id, foobar: foobar_id }, data: diet } do
             assert { :ok, { results, page } } = Diet.find([name: "f"], [locale: "aa", limit: 10])
             assert foobar_id == page
             assert Enum.sort([
@@ -207,7 +208,7 @@ defmodule Fondant.Service.Filter.Type.DietTest do
             assert [] == results
         end
 
-        test "query any", %{ id: %{ foo: foo_id, foobar: foobar_id }, data: diet } do
+        test "query any", %{ page: %{ foo: foo_id, foobar: foobar_id }, data: diet } do
             assert { :ok, { results, page } } = Diet.find([any: "f"], [locale: "aa", limit: 10])
             assert foobar_id == page
             assert Enum.sort([
@@ -273,7 +274,7 @@ defmodule Fondant.Service.Filter.Type.DietTest do
             assert [] == results
         end
 
-        test "all queries", %{ id: %{ foobar: foobar_id }, data: diet } do
+        test "all queries", %{ page: %{ foobar: foobar_id }, data: diet } do
             assert { :ok, { results, page } } = Diet.find([name: "f", any: "foob"], [locale: "aa", limit: 10])
             assert foobar_id == page
             assert [

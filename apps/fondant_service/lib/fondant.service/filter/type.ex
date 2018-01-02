@@ -27,7 +27,7 @@ defmodule Fondant.Service.Filter.Type do
 
       If the operation was successful return `{ :ok, filter }`.
     """
-    @callback get(id :: integer, locale) :: { :ok, filter } | { :error, reason :: String.t }
+    @callback get(id :: String.t, locale) :: { :ok, filter } | { :error, reason :: String.t }
 
     @doc """
       Implement the behaviour for finding filters that match the given query.
@@ -62,7 +62,7 @@ defmodule Fondant.Service.Filter.Type do
       Returns `{ :ok, filter }` if the operation was successful, otherwise returns
       an error.
     """
-    @spec get(atom, integer, locale) :: { :ok, filter } | { :error, String.t }
+    @spec get(atom, String.t, locale) :: { :ok, filter } | { :error, String.t }
     def get(type, id, locale) do
         atom_to_module(type).get(id, locale)
     end

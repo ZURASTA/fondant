@@ -5,7 +5,7 @@ defmodule Fondant.Filter.Diet do
       ##Fields
 
       ###:id
-      Is the unique id to reference this filter. Is an `integer`.
+      Is the unique id to reference this filter. Is a `string`.
 
       ###:name
       Is the localised name of the diet. Is a `string`.
@@ -17,7 +17,7 @@ defmodule Fondant.Filter.Diet do
     ]
 
     @type t :: %Fondant.Filter.Diet{
-        id: integer,
+        id: String.t,
         name: String.t
     }
 end

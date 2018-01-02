@@ -16,11 +16,11 @@ defmodule Fondant.Service.Filter.Type.Diet do
             nil -> { :error, "Invalid locale" }
             locale ->
                 query = from diet in Diet.Model,
-                    where: diet.id == ^id,
+                    where: diet.ref_id == ^id,
                     locale: ^locale,
                     translate: name in diet.name,
                     select: %{
-                        id: diet.id,
+                        id: diet.ref_id,
                         name: name.term
                     }
 
@@ -46,8 +46,9 @@ defmodule Fondant.Service.Filter.Type.Diet do
             limit: ^options[:limit],
             where: diet.id > ^options[:page],
             select: %{
-                id: diet.id,
-                name: name.term
+                id: diet.ref_id,
+                name: name.term,
+                page: diet.id
             }
     end
 
@@ -63,7 +64,7 @@ defmodule Fondant.Service.Filter.Type.Diet do
                         case Fondant.Service.Repo.all(query_all(query, options)) do
                             nil -> { :error, "Could not retrieve any diets" }
                             [] -> { :ok, { [], options[:page] } }
-                            result -> { :ok, { Enum.map(result, &Map.merge(%Fondant.Filter.Diet{}, &1)), List.last(result).id } }
+                            result -> { :ok, { Enum.map(result, &Map.merge(%Fondant.Filter.Diet{}, Map.delete(&1, :page))), List.last(result).page } }
                         end
                 end
         end
