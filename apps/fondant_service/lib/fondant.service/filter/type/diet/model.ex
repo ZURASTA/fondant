@@ -41,7 +41,8 @@ defmodule Fondant.Service.Filter.Type.Diet.Model do
     """
     def changeset(struct, params \\ %{}) do
         struct
-        |> translatable_changeset(params, [:ref, :ref_id, :name])
+        |> translatable_changeset(params, [:name])
+        |> cast(params, [:ref, :ref_id])
         |> validate_required([:ref, :ref_id, :name])
         |> unique_constraint(:ref)
         |> unique_constraint(:ref_id)
