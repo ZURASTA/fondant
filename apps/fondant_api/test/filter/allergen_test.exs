@@ -19,9 +19,9 @@ defmodule Fondant.API.Filter.AllergenTest do
         Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Allergen.Translation.Name.Model{ translate_id: 3, locale_id: zz.id, term: "bar_zz" })
         Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Allergen.Translation.Name.Model{ translate_id: 3, locale_id: aa_bb.id, term: "bar_aa_bb" })
 
-        foo = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Allergen.Model{ name: 1 })
-        foobar = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Allergen.Model{ name: 2 })
-        bar = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Allergen.Model{ name: 3 })
+        foo = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Allergen.Model{ ref: "foo", ref_id: Ecto.UUID.generate(), name: 1 })
+        foobar = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Allergen.Model{ ref: "foobar", ref_id: Ecto.UUID.generate(), name: 2 })
+        bar = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Allergen.Model{ ref: "bar", ref_id: Ecto.UUID.generate(), name: 3 })
 
         {
             :ok,

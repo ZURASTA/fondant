@@ -14,10 +14,19 @@ defmodule Fondant.Service.Repo.Migrations.Allergen do
         end
 
         create table(:allergens) do
+            add :ref, :string,
+                null: false
+
+            add :ref_id, :uuid,
+                null: false
+
             translate :name, null: false
+
             timestamps()
         end
 
+        create index(:allergens, [:ref], unique: true)
+        create index(:allergens, [:ref_id], unique: true)
         create index(:allergens, [:name], unique: true)
     end
 end
