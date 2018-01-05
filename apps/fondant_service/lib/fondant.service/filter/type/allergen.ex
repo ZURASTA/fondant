@@ -16,11 +16,11 @@ defmodule Fondant.Service.Filter.Type.Allergen do
             nil -> { :error, "Invalid locale" }
             locale ->
                 query = from allergen in Allergen.Model,
-                    where: allergen.id == ^id,
+                    where: allergen.ref_id == ^id,
                     locale: ^locale,
                     translate: name in allergen.name,
                     select: %{
-                        id: allergen.id,
+                        id: allergen.ref_id,
                         name: name.term
                     }
 
@@ -46,8 +46,9 @@ defmodule Fondant.Service.Filter.Type.Allergen do
             limit: ^options[:limit],
             where: allergen.id > ^options[:page],
             select: %{
-                id: allergen.id,
-                name: name.term
+                id: allergen.ref_id,
+                name: name.term,
+                page: allergen.id
             }
     end
 
@@ -63,7 +64,7 @@ defmodule Fondant.Service.Filter.Type.Allergen do
                         case Fondant.Service.Repo.all(query_all(query, options)) do
                             nil -> { :error, "Could not retrieve any allergens" }
                             [] -> { :ok, { [], options[:page] } }
-                            result -> { :ok, { Enum.map(result, &Map.merge(%Fondant.Filter.Allergen{}, &1)), List.last(result).id } }
+                            result -> { :ok, { Enum.map(result, &Map.merge(%Fondant.Filter.Allergen{}, Map.delete(&1, :page))), List.last(result).page } }
                         end
                 end
         end

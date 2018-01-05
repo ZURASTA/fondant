@@ -16,7 +16,7 @@ defmodule Fondant.API.Filter.Allergen do
       Returns `{ :ok, allergen_filter }` if the operation was successful, otherwise returns
       an error.
     """
-    @spec get(integer, Filter.locale) :: { :ok, Fondant.Filter.Allergen.t } | { :error, String.t }
+    @spec get(String.t, Filter.locale) :: { :ok, Fondant.Filter.Allergen.t } | { :error, String.t }
     def get(id, locale) do
         GenServer.call(@service, { :get, { @filter_type, id, locale } })
     end
