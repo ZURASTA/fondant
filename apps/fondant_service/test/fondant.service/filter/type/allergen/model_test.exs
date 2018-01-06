@@ -35,7 +35,7 @@ defmodule Fondant.Service.Filter.Type.Allergen.ModelTest do
     end
 
     test "uniqueness" do
-        name = Fondant.Service.Repo.insert!(@valid_model)
+        _name = Fondant.Service.Repo.insert!(@valid_model)
 
         assert_change(%Allergen.Model{}, %{ ref: @valid_model.ref, ref_id: Ecto.UUID.generate(), name: @valid_model.name + 1 })
         |> assert_insert(:error)
@@ -57,12 +57,12 @@ defmodule Fondant.Service.Filter.Type.Allergen.ModelTest do
         en = Fondant.Service.Repo.insert!(%Fondant.Service.Locale.Model{ language: "en" })
         fr = Fondant.Service.Repo.insert!(%Fondant.Service.Locale.Model{ language: "fr" })
         en_peanut = Fondant.Service.Repo.insert!(Allergen.Translation.Name.Model.changeset(%Allergen.Translation.Name.Model{}, %{ translate_id: 1, locale_id: en.id, term: "peanut allergy" }))
-        fr_peanut = Fondant.Service.Repo.insert!(Allergen.Translation.Name.Model.changeset(%Allergen.Translation.Name.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "allergie à l'arachide" }))
+        _fr_peanut = Fondant.Service.Repo.insert!(Allergen.Translation.Name.Model.changeset(%Allergen.Translation.Name.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "allergie à l'arachide" }))
         en_fish = Fondant.Service.Repo.insert!(Allergen.Translation.Name.Model.changeset(%Allergen.Translation.Name.Model{}, %{ translate_id: 2, locale_id: en.id, term: "fish allergy" }))
-        fr_fish = Fondant.Service.Repo.insert!(Allergen.Translation.Name.Model.changeset(%Allergen.Translation.Name.Model{}, %{ translate_id: 2, locale_id: fr.id, term: "allergie au poisson" }))
+        _fr_fish = Fondant.Service.Repo.insert!(Allergen.Translation.Name.Model.changeset(%Allergen.Translation.Name.Model{}, %{ translate_id: 2, locale_id: fr.id, term: "allergie au poisson" }))
 
-        allergen_peanut = Fondant.Service.Repo.insert!(Allergen.Model.changeset(%Allergen.Model{}, %{ ref: "peanut", ref_id: Ecto.UUID.generate(), name: en_peanut.translate_id }))
-        allergen_fish = Fondant.Service.Repo.insert!(Allergen.Model.changeset(%Allergen.Model{}, %{ ref: "fish", ref_id: Ecto.UUID.generate(), name: en_fish.translate_id }))
+        _allergen_peanut = Fondant.Service.Repo.insert!(Allergen.Model.changeset(%Allergen.Model{}, %{ ref: "peanut", ref_id: Ecto.UUID.generate(), name: en_peanut.translate_id }))
+        _allergen_fish = Fondant.Service.Repo.insert!(Allergen.Model.changeset(%Allergen.Model{}, %{ ref: "fish", ref_id: Ecto.UUID.generate(), name: en_fish.translate_id }))
 
         query = from allergen in Allergen.Model,
             locale: ^en.id,

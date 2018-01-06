@@ -35,7 +35,7 @@ defmodule Fondant.Service.Filter.Type.Diet.ModelTest do
     end
 
     test "uniqueness" do
-        name = Fondant.Service.Repo.insert!(@valid_model)
+        _name = Fondant.Service.Repo.insert!(@valid_model)
 
         assert_change(%Diet.Model{}, %{ ref: @valid_model.ref, ref_id: Ecto.UUID.generate(), name: @valid_model.name + 1 })
         |> assert_insert(:error)
@@ -57,12 +57,12 @@ defmodule Fondant.Service.Filter.Type.Diet.ModelTest do
         en = Fondant.Service.Repo.insert!(%Fondant.Service.Locale.Model{ language: "en" })
         fr = Fondant.Service.Repo.insert!(%Fondant.Service.Locale.Model{ language: "fr" })
         en_vegan = Fondant.Service.Repo.insert!(Diet.Translation.Name.Model.changeset(%Diet.Translation.Name.Model{}, %{ translate_id: 1, locale_id: en.id, term: "vegan" }))
-        fr_vegan = Fondant.Service.Repo.insert!(Diet.Translation.Name.Model.changeset(%Diet.Translation.Name.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "végétalien" }))
+        _fr_vegan = Fondant.Service.Repo.insert!(Diet.Translation.Name.Model.changeset(%Diet.Translation.Name.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "végétalien" }))
         en_vegetarian = Fondant.Service.Repo.insert!(Diet.Translation.Name.Model.changeset(%Diet.Translation.Name.Model{}, %{ translate_id: 2, locale_id: en.id, term: "vegetarian" }))
-        fr_vegetarian = Fondant.Service.Repo.insert!(Diet.Translation.Name.Model.changeset(%Diet.Translation.Name.Model{}, %{ translate_id: 2, locale_id: fr.id, term: "végétarien" }))
+        _fr_vegetarian = Fondant.Service.Repo.insert!(Diet.Translation.Name.Model.changeset(%Diet.Translation.Name.Model{}, %{ translate_id: 2, locale_id: fr.id, term: "végétarien" }))
 
-        diet_vegan = Fondant.Service.Repo.insert!(Diet.Model.changeset(%Diet.Model{}, %{ ref: "vegan", ref_id: Ecto.UUID.generate(), name: en_vegan.translate_id }))
-        diet_vegetarian = Fondant.Service.Repo.insert!(Diet.Model.changeset(%Diet.Model{}, %{ ref: "vegetarian", ref_id: Ecto.UUID.generate(), name: en_vegetarian.translate_id }))
+        _diet_vegan = Fondant.Service.Repo.insert!(Diet.Model.changeset(%Diet.Model{}, %{ ref: "vegan", ref_id: Ecto.UUID.generate(), name: en_vegan.translate_id }))
+        _diet_vegetarian = Fondant.Service.Repo.insert!(Diet.Model.changeset(%Diet.Model{}, %{ ref: "vegetarian", ref_id: Ecto.UUID.generate(), name: en_vegetarian.translate_id }))
 
         query = from diet in Diet.Model,
             locale: ^en.id,

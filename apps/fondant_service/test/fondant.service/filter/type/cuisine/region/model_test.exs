@@ -43,7 +43,7 @@ defmodule Bonbon.Model.Cuisine.RegionTest do
     end
 
     test "uniqueness" do
-        name = Fondant.Service.Repo.insert!(@valid_model)
+        _name = Fondant.Service.Repo.insert!(@valid_model)
 
         assert_change(@valid_model)
         |> assert_insert(:error)
@@ -71,15 +71,15 @@ defmodule Bonbon.Model.Cuisine.RegionTest do
         en = Fondant.Service.Repo.insert!(%Fondant.Service.Locale.Model{ language: "en" })
         fr = Fondant.Service.Repo.insert!(%Fondant.Service.Locale.Model{ language: "fr" })
         en_continent = Fondant.Service.Repo.insert!(Region.Translation.Continent.Model.changeset(%Region.Translation.Continent.Model{}, %{ translate_id: 1, locale_id: en.id, term: "africa" }))
-        fr_continent = Fondant.Service.Repo.insert!(Region.Translation.Continent.Model.changeset(%Region.Translation.Continent.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "afrique" }))
+        _fr_continent = Fondant.Service.Repo.insert!(Region.Translation.Continent.Model.changeset(%Region.Translation.Continent.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "afrique" }))
         en_subregion = Fondant.Service.Repo.insert!(Region.Translation.Subregion.Model.changeset(%Region.Translation.Subregion.Model{}, %{ translate_id: 1, locale_id: en.id, term: "central africa" }))
-        fr_subregion = Fondant.Service.Repo.insert!(Region.Translation.Subregion.Model.changeset(%Region.Translation.Subregion.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "afrique centrale" }))
+        _fr_subregion = Fondant.Service.Repo.insert!(Region.Translation.Subregion.Model.changeset(%Region.Translation.Subregion.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "afrique centrale" }))
         en_country = Fondant.Service.Repo.insert!(Region.Translation.Country.Model.changeset(%Region.Translation.Country.Model{}, %{ translate_id: 1, locale_id: en.id, term: "gabon" }))
-        fr_country = Fondant.Service.Repo.insert!(Region.Translation.Country.Model.changeset(%Region.Translation.Country.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "gabon" }))
+        _fr_country = Fondant.Service.Repo.insert!(Region.Translation.Country.Model.changeset(%Region.Translation.Country.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "gabon" }))
         en_province = Fondant.Service.Repo.insert!(Region.Translation.Province.Model.changeset(%Region.Translation.Province.Model{}, %{ translate_id: 1, locale_id: en.id, term: "estuaire" }))
-        fr_province = Fondant.Service.Repo.insert!(Region.Translation.Province.Model.changeset(%Region.Translation.Province.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "estuaire" }))
+        _fr_province = Fondant.Service.Repo.insert!(Region.Translation.Province.Model.changeset(%Region.Translation.Province.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "estuaire" }))
 
-        region = Fondant.Service.Repo.insert!(Region.Model.changeset(%Region.Model{}, %{ continent: en_continent.translate_id, subregion: en_subregion.translate_id, country: en_country.translate_id, province: en_province.translate_id }))
+        _region = Fondant.Service.Repo.insert!(Region.Model.changeset(%Region.Model{}, %{ continent: en_continent.translate_id, subregion: en_subregion.translate_id, country: en_country.translate_id, province: en_province.translate_id }))
 
         query = from region in Region.Model,
             locale: ^en.id,

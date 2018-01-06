@@ -43,7 +43,7 @@ defmodule Fondant.Service.Filter.Type.Ingredient.ModelTest do
     end
 
     test "uniqueness" do
-        name = Fondant.Service.Repo.insert!(@valid_model)
+        _name = Fondant.Service.Repo.insert!(@valid_model)
 
         assert_change(%Ingredient.Model{}, %{ ref: @valid_model.ref, ref_id: Ecto.UUID.generate(), type: @valid_model.type, name: @valid_model.name + 1 })
         |> assert_insert(:error)
@@ -68,14 +68,14 @@ defmodule Fondant.Service.Filter.Type.Ingredient.ModelTest do
         en = Fondant.Service.Repo.insert!(%Fondant.Service.Locale.Model{ language: "en" })
         fr = Fondant.Service.Repo.insert!(%Fondant.Service.Locale.Model{ language: "fr" })
         en_fruit = Fondant.Service.Repo.insert!(Ingredient.Translation.Type.Model.changeset(%Ingredient.Translation.Type.Model{}, %{ translate_id: 1, locale_id: en.id, term: "fruit" }))
-        fr_fruit = Fondant.Service.Repo.insert!(Ingredient.Translation.Type.Model.changeset(%Ingredient.Translation.Type.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "fruit" }))
+        _fr_fruit = Fondant.Service.Repo.insert!(Ingredient.Translation.Type.Model.changeset(%Ingredient.Translation.Type.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "fruit" }))
         en_apple = Fondant.Service.Repo.insert!(Ingredient.Translation.Name.Model.changeset(%Ingredient.Translation.Name.Model{}, %{ translate_id: 1, locale_id: en.id, term: "apple" }))
-        fr_apple = Fondant.Service.Repo.insert!(Ingredient.Translation.Name.Model.changeset(%Ingredient.Translation.Name.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "pomme" }))
+        _fr_apple = Fondant.Service.Repo.insert!(Ingredient.Translation.Name.Model.changeset(%Ingredient.Translation.Name.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "pomme" }))
         en_lemon = Fondant.Service.Repo.insert!(Ingredient.Translation.Name.Model.changeset(%Ingredient.Translation.Name.Model{}, %{ translate_id: 2, locale_id: en.id, term: "lemon" }))
-        fr_lemon = Fondant.Service.Repo.insert!(Ingredient.Translation.Name.Model.changeset(%Ingredient.Translation.Name.Model{}, %{ translate_id: 2, locale_id: fr.id, term: "citron" }))
+        _fr_lemon = Fondant.Service.Repo.insert!(Ingredient.Translation.Name.Model.changeset(%Ingredient.Translation.Name.Model{}, %{ translate_id: 2, locale_id: fr.id, term: "citron" }))
 
-        ingredient_apple = Fondant.Service.Repo.insert!(Ingredient.Model.changeset(%Ingredient.Model{}, %{ ref: "apple", ref_id: Ecto.UUID.generate(), type: en_fruit.translate_id, name: en_apple.translate_id }))
-        ingredient_lemon = Fondant.Service.Repo.insert!(Ingredient.Model.changeset(%Ingredient.Model{}, %{ ref: "lemon", ref_id: Ecto.UUID.generate(), type: en_fruit.translate_id, name: en_lemon.translate_id }))
+        _ingredient_apple = Fondant.Service.Repo.insert!(Ingredient.Model.changeset(%Ingredient.Model{}, %{ ref: "apple", ref_id: Ecto.UUID.generate(), type: en_fruit.translate_id, name: en_apple.translate_id }))
+        _ingredient_lemon = Fondant.Service.Repo.insert!(Ingredient.Model.changeset(%Ingredient.Model{}, %{ ref: "lemon", ref_id: Ecto.UUID.generate(), type: en_fruit.translate_id, name: en_lemon.translate_id }))
 
         query = from ingredient in Ingredient.Model,
             locale: ^en.id,
