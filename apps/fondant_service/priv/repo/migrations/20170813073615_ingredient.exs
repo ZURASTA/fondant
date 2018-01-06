@@ -24,11 +24,21 @@ defmodule Fondant.Service.Repo.Migrations.Ingredient do
         end
 
         create table(:ingredients) do
+            add :ref, :string,
+                null: false
+
+            add :ref_id, :uuid,
+                null: false
+
             translate :type, null: true
+
             translate :name, null: false
+
             timestamps()
         end
 
+        create index(:ingredients, [:ref], unique: true)
+        create index(:ingredients, [:ref_id], unique: true)
         create index(:ingredients, [:name], unique: true)
     end
 end

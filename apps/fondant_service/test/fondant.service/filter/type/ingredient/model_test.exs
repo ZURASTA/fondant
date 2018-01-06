@@ -4,10 +4,18 @@ defmodule Fondant.Service.Filter.Type.Ingredient.ModelTest do
 
     alias Fondant.Service.Filter.Type.Ingredient
 
-    @valid_model %Ingredient.Model{ type: 1, name: 1 }
+    @valid_model %Ingredient.Model{ ref: "test", ref_id: Ecto.UUID.generate(), type: 1, name: 1 }
 
     test "empty" do
         refute_change(%Ingredient.Model{})
+    end
+
+    test "only ref" do
+        refute_change(%Ingredient.Model{}, %{ ref: "test" })
+    end
+
+    test "only ref_id" do
+        refute_change(%Ingredient.Model{}, %{ ref_id: Ecto.UUID.generate() })
     end
 
     test "only type" do
@@ -15,20 +23,44 @@ defmodule Fondant.Service.Filter.Type.Ingredient.ModelTest do
     end
 
     test "only name" do
-        assert_change(%Ingredient.Model{}, %{ name: 1 })
+        refute_change(%Ingredient.Model{}, %{ name: 1 })
+    end
+
+    test "without ref" do
+        refute_change(%Ingredient.Model{}, %{ ref_id: Ecto.UUID.generate(), name: 1, type: 1 })
+    end
+
+    test "without ref_id" do
+        refute_change(%Ingredient.Model{}, %{ ref: "test", name: 1, type: 1 })
+    end
+
+    test "without type" do
+        assert_change(%Ingredient.Model{}, %{ ref: "test", ref_id: Ecto.UUID.generate(), name: 1 })
+    end
+
+    test "without name" do
+        refute_change(%Ingredient.Model{}, %{ ref: "test", ref_id: Ecto.UUID.generate(), type: 1 })
     end
 
     test "uniqueness" do
         name = Fondant.Service.Repo.insert!(@valid_model)
 
-        assert_change(%Ingredient.Model{}, %{ type: @valid_model.type + 1, name: @valid_model.name })
+        assert_change(%Ingredient.Model{}, %{ ref: @valid_model.ref, ref_id: Ecto.UUID.generate(), type: @valid_model.type, name: @valid_model.name + 1 })
+        |> assert_insert(:error)
+        |> assert_error_value(:ref, { "has already been taken", [] })
+
+        assert_change(%Ingredient.Model{}, %{ ref: @valid_model.ref <> "1", ref_id: @valid_model.ref_id, type: @valid_model.type, name: @valid_model.name + 1 })
+        |> assert_insert(:error)
+        |> assert_error_value(:ref_id, { "has already been taken", [] })
+
+        assert_change(%Ingredient.Model{}, %{ ref: @valid_model.ref <> "1", ref_id: Ecto.UUID.generate(), type: @valid_model.type + 1, name: @valid_model.name })
         |> assert_insert(:error)
         |> assert_error_value(:name, { "has already been taken", [] })
 
-        assert_change(%Ingredient.Model{}, %{ type: @valid_model.type, name: @valid_model.name + 1 })
+        assert_change(%Ingredient.Model{}, %{ ref: @valid_model.ref <> "1", ref_id: Ecto.UUID.generate(), type: @valid_model.type, name: @valid_model.name + 1 })
         |> assert_insert(:ok)
 
-        assert_change(%Ingredient.Model{}, %{ type: @valid_model.type + 1, name: @valid_model.name + 2 })
+        assert_change(%Ingredient.Model{}, %{ ref: @valid_model.ref <> "2", ref_id: Ecto.UUID.generate(), type: @valid_model.type + 1, name: @valid_model.name + 2 })
         |> assert_insert(:ok)
     end
 
@@ -42,8 +74,8 @@ defmodule Fondant.Service.Filter.Type.Ingredient.ModelTest do
         en_lemon = Fondant.Service.Repo.insert!(Ingredient.Translation.Name.Model.changeset(%Ingredient.Translation.Name.Model{}, %{ translate_id: 2, locale_id: en.id, term: "lemon" }))
         fr_lemon = Fondant.Service.Repo.insert!(Ingredient.Translation.Name.Model.changeset(%Ingredient.Translation.Name.Model{}, %{ translate_id: 2, locale_id: fr.id, term: "citron" }))
 
-        ingredient_apple = Fondant.Service.Repo.insert!(Ingredient.Model.changeset(%Ingredient.Model{}, %{ type: en_fruit.translate_id, name: en_apple.translate_id }))
-        ingredient_lemon = Fondant.Service.Repo.insert!(Ingredient.Model.changeset(%Ingredient.Model{}, %{ type: en_fruit.translate_id, name: en_lemon.translate_id }))
+        ingredient_apple = Fondant.Service.Repo.insert!(Ingredient.Model.changeset(%Ingredient.Model{}, %{ ref: "apple", ref_id: Ecto.UUID.generate(), type: en_fruit.translate_id, name: en_apple.translate_id }))
+        ingredient_lemon = Fondant.Service.Repo.insert!(Ingredient.Model.changeset(%Ingredient.Model{}, %{ ref: "lemon", ref_id: Ecto.UUID.generate(), type: en_fruit.translate_id, name: en_lemon.translate_id }))
 
         query = from ingredient in Ingredient.Model,
             locale: ^en.id,

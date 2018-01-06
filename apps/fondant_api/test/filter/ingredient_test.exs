@@ -29,9 +29,9 @@ defmodule Fondant.API.Filter.IngredientTest do
         Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Ingredient.Translation.Type.Model{ translate_id: 3 + 3, locale_id: zz.id, term: "bar_type_zz" })
         Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Ingredient.Translation.Type.Model{ translate_id: 3 + 3, locale_id: aa_bb.id, term: "bar_type_aa_bb" })
 
-        foo = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Ingredient.Model{ name: 1, type: 1 + 3 })
-        foobar = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Ingredient.Model{ name: 2, type: 2 + 3 })
-        bar = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Ingredient.Model{ name: 3, type: 3 + 3 })
+        foo = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Ingredient.Model{ ref: "foo", ref_id: Ecto.UUID.generate(), name: 1, type: 1 + 3 })
+        foobar = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Ingredient.Model{ ref: "foobar", ref_id: Ecto.UUID.generate(), name: 2, type: 2 + 3 })
+        bar = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Ingredient.Model{ ref: "bar", ref_id: Ecto.UUID.generate(), name: 3, type: 3 + 3 })
 
         {
             :ok,
