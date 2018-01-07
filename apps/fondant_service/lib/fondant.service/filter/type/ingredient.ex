@@ -16,12 +16,12 @@ defmodule Fondant.Service.Filter.Type.Ingredient do
             nil -> { :error, "Invalid locale" }
             locale ->
                 query = from ingredient in Ingredient.Model,
-                    where: ingredient.id == ^id,
+                    where: ingredient.ref_id == ^id,
                     locale: ^locale,
                     translate: name in ingredient.name,
                     translate: type in ingredient.type,
                     select: %{
-                        id: ingredient.id,
+                        id: ingredient.ref_id,
                         name: name.term,
                         type: type.term
                     }
@@ -57,9 +57,10 @@ defmodule Fondant.Service.Filter.Type.Ingredient do
             where: ingredient.id > ^options[:page],
             locale_match: [name, type],
             select: %{
-                id: ingredient.id,
+                id: ingredient.ref_id,
                 name: name.term,
-                type: type.term
+                type: type.term,
+                page: ingredient.id
             }
     end
 
@@ -75,7 +76,7 @@ defmodule Fondant.Service.Filter.Type.Ingredient do
                         case Fondant.Service.Repo.all(query_all(query, options)) do
                             nil -> { :error, "Could not retrieve any ingredients" }
                             [] -> { :ok, { [], options[:page] } }
-                            result -> { :ok, { Enum.map(result, &Map.merge(%Fondant.Filter.Ingredient{}, &1)), List.last(result).id } }
+                            result -> { :ok, { Enum.map(result, &Map.merge(%Fondant.Filter.Ingredient{}, Map.delete(&1, :page))), List.last(result).page } }
                         end
                 end
         end

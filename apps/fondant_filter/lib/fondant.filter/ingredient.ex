@@ -21,7 +21,7 @@ defmodule Fondant.Filter.Ingredient do
     ]
 
     @type t :: %Fondant.Filter.Ingredient{
-        id: integer,
+        id: String.t,
         name: String.t,
         type: String.t | nil
     }
