@@ -60,9 +60,9 @@ defmodule Fondant.Service.Filter.Type.CuisineTest do
         Fondant.Service.Repo.insert!(%Cuisine.Translation.Name.Model{ translate_id: 3 + 12, locale_id: zz.id, term: "bar_name_zz" })
         Fondant.Service.Repo.insert!(%Cuisine.Translation.Name.Model{ translate_id: 3 + 12, locale_id: aa_bb.id, term: "bar_name_aa_bb" })
 
-        region_foo = Fondant.Service.Repo.insert!(%Region.Model{ continent: 1, subregion: 1 + 3, country: 1 + 6, province: 1 + 9 })
-        region_foobar = Fondant.Service.Repo.insert!(%Region.Model{ continent: 2, subregion: 2 + 3, country: 2 + 6, province: 2 + 9 })
-        region_bar = Fondant.Service.Repo.insert!(%Region.Model{ continent: 3, subregion: 3 + 3, country: 3 + 6, province: 3 + 9 })
+        region_foo = Fondant.Service.Repo.insert!(%Region.Model{ ref: "foo", ref_id: Ecto.UUID.generate(), continent: 1, subregion: 1 + 3, country: 1 + 6, province: 1 + 9 })
+        region_foobar = Fondant.Service.Repo.insert!(%Region.Model{ ref: "foobar", ref_id: Ecto.UUID.generate(), continent: 2, subregion: 2 + 3, country: 2 + 6, province: 2 + 9 })
+        region_bar = Fondant.Service.Repo.insert!(%Region.Model{ ref: "bar", ref_id: Ecto.UUID.generate(), continent: 3, subregion: 3 + 3, country: 3 + 6, province: 3 + 9 })
 
         foo = Fondant.Service.Repo.insert!(%Cuisine.Model{ name: 1 + 12, region_id: region_foo.id })
         foobar = Fondant.Service.Repo.insert!(%Cuisine.Model{ name: 2 + 12, region_id: region_foobar.id })

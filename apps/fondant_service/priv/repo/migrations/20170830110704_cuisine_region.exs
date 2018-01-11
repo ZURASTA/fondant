@@ -44,14 +44,25 @@ defmodule Fondant.Service.Repo.Migrations.CuisineRegion do
         end
 
         create table(:cuisine_regions) do
+            add :ref, :string,
+                null: false
+
+            add :ref_id, :uuid,
+                null: false
+
             translate :continent, null: false
+
             translate :subregion, null: true
+
             translate :country, null: true
+
             translate :province, null: true
+
             timestamps()
         end
 
-        # create index(:cuisine_regions, [:continent, :subregion, :country, :province], unique: true, name: :cuisine_regions_region_index)
+        create index(:cuisine_regions, [:ref], unique: true)
+        create index(:cuisine_regions, [:ref_id], unique: true)
         execute("CREATE UNIQUE INDEX cuisine_regions_region_index ON cuisine_regions(continent, COALESCE(subregion, 0), COALESCE(country, 0), COALESCE(province, 0))")
     end
 end

@@ -30,8 +30,8 @@ defmodule Fondant.Service.Filter.Type.Cuisine.ModelTest do
         en_province = Fondant.Service.Repo.insert!(Cuisine.Region.Translation.Province.Model.changeset(%Cuisine.Region.Translation.Province.Model{}, %{ translate_id: 1, locale_id: en.id, term: "estuaire" }))
         _fr_province = Fondant.Service.Repo.insert!(Cuisine.Region.Translation.Province.Model.changeset(%Cuisine.Region.Translation.Province.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "estuaire" }))
 
-        region = Fondant.Service.Repo.insert!(Cuisine.Region.Model.changeset(%Cuisine.Region.Model{}, %{ continent: en_continent.translate_id, subregion: en_subregion.translate_id, country: en_country.translate_id, province: en_province.translate_id }))
-        region2 = Fondant.Service.Repo.insert!(Cuisine.Region.Model.changeset(%Cuisine.Region.Model{}, %{ continent: en_continent.translate_id }))
+        region = Fondant.Service.Repo.insert!(Cuisine.Region.Model.changeset(%Cuisine.Region.Model{}, %{ ref: "estuaire", ref_id: Ecto.UUID.generate(), continent: en_continent.translate_id, subregion: en_subregion.translate_id, country: en_country.translate_id, province: en_province.translate_id }))
+        region2 = Fondant.Service.Repo.insert!(Cuisine.Region.Model.changeset(%Cuisine.Region.Model{}, %{ ref: "africa", ref_id: Ecto.UUID.generate(), continent: en_continent.translate_id }))
 
         _cuisine = Fondant.Service.Repo.insert!(Cuisine.Model.changeset(@valid_model, %{ region_id: region.id }))
 
@@ -60,7 +60,7 @@ defmodule Fondant.Service.Filter.Type.Cuisine.ModelTest do
         en_continent = Fondant.Service.Repo.insert!(Cuisine.Region.Translation.Continent.Model.changeset(%Cuisine.Region.Translation.Continent.Model{}, %{ translate_id: 1, locale_id: en.id, term: "europe" }))
         _fr_continent = Fondant.Service.Repo.insert!(Cuisine.Region.Translation.Continent.Model.changeset(%Cuisine.Region.Translation.Continent.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "europe" }))
 
-        region = Fondant.Service.Repo.insert!(Cuisine.Region.Model.changeset(%Cuisine.Region.Model{}, %{ continent: en_continent.translate_id }))
+        region = Fondant.Service.Repo.insert!(Cuisine.Region.Model.changeset(%Cuisine.Region.Model{}, %{ ref: "europe", ref_id: Ecto.UUID.generate(), continent: en_continent.translate_id }))
 
         en_pasta = Fondant.Service.Repo.insert!(Cuisine.Translation.Name.Model.changeset(%Cuisine.Translation.Name.Model{}, %{ translate_id: 1, locale_id: en.id, term: "pasta" }))
         _fr_pasta = Fondant.Service.Repo.insert!(Cuisine.Translation.Name.Model.changeset(%Cuisine.Translation.Name.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "pâtes" }))

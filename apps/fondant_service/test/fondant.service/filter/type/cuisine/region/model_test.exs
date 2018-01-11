@@ -4,14 +4,22 @@ defmodule Bonbon.Model.Cuisine.RegionTest do
 
     alias Fondant.Service.Filter.Type.Cuisine.Region
 
-    @valid_model %Region.Model{ continent: 1 }
+    @valid_model %Region.Model{ ref: "test", ref_id: Ecto.UUID.generate(), continent: 1 }
 
     test "empty" do
         refute_change(%Region.Model{})
     end
 
+    test "only ref" do
+        refute_change(%Region.Model{}, %{ ref: "test" })
+    end
+
+    test "only ref_id" do
+        refute_change(%Region.Model{}, %{ ref_id: Ecto.UUID.generate() })
+    end
+
     test "only continent" do
-        assert_change(%Region.Model{}, %{ continent: 1 })
+        refute_change(%Region.Model{}, %{ continent: 1 })
     end
 
     test "only subregion" do
@@ -26,26 +34,42 @@ defmodule Bonbon.Model.Cuisine.RegionTest do
         refute_change(%Region.Model{}, %{ province: 1 })
     end
 
+    test "without ref" do
+        refute_change(%Region.Model{}, %{ ref_id: Ecto.UUID.generate(), continent: 1, subregion: 1, country: 1, province: 1 })
+    end
+
+    test "without ref_id" do
+        refute_change(%Region.Model{}, %{ ref: "test", continent: 1, subregion: 1, country: 1, province: 1 })
+    end
+
     test "without continent" do
-        refute_change(%Region.Model{}, %{ subregion: 1, country: 1, province: 1 })
+        refute_change(%Region.Model{}, %{ ref: "test", ref_id: Ecto.UUID.generate(), subregion: 1, country: 1, province: 1 })
     end
 
     test "without subregion" do
-        assert_change(%Region.Model{}, %{ continent: 1, country: 1, province: 1 })
+        assert_change(%Region.Model{}, %{ ref: "test", ref_id: Ecto.UUID.generate(), continent: 1, country: 1, province: 1 })
     end
 
     test "without country" do
-        assert_change(%Region.Model{}, %{ continent: 1, subregion: 1, province: 1 })
+        assert_change(%Region.Model{}, %{ ref: "test", ref_id: Ecto.UUID.generate(), continent: 1, subregion: 1, province: 1 })
     end
 
     test "without province" do
-        assert_change(%Region.Model{}, %{ continent: 1, subregion: 1, country: 1 })
+        assert_change(%Region.Model{}, %{ ref: "test", ref_id: Ecto.UUID.generate(), continent: 1, subregion: 1, country: 1 })
     end
 
     test "uniqueness" do
         _name = Fondant.Service.Repo.insert!(@valid_model)
 
-        assert_change(@valid_model)
+        assert_change(%Region.Model{}, %{ ref: @valid_model.ref, ref_id: Ecto.UUID.generate(), continent: @valid_model.continent + 1, subregion: @valid_model.subregion, country: @valid_model.country, province: @valid_model.province })
+        |> assert_insert(:error)
+        |> assert_error_value(:ref, { "has already been taken", [] })
+
+        assert_change(%Region.Model{}, %{ ref: @valid_model.ref <> "1", ref_id: @valid_model.ref_id, continent: @valid_model.continent + 1, subregion: @valid_model.subregion, country: @valid_model.country, province: @valid_model.province })
+        |> assert_insert(:error)
+        |> assert_error_value(:ref_id, { "has already been taken", [] })
+
+        assert_change(%Region.Model{}, %{ ref: @valid_model.ref <> "1", ref_id: Ecto.UUID.generate(), continent: @valid_model.continent, subregion: @valid_model.subregion, country: @valid_model.country, province: @valid_model.province })
         |> assert_insert(:error)
         |> assert_error_value(:region, { "has already been taken", [] })
 
@@ -53,7 +77,7 @@ defmodule Bonbon.Model.Cuisine.RegionTest do
             subregion <- [nil, 1],
             country <- [nil, 1],
             province <- [nil, 1] do
-                assert_change(%Region.Model{}, %{ continent: continent, subregion: subregion, country: country, province: province })
+                assert_change(%Region.Model{}, %{ ref: @valid_model.ref <> "1#{continent || 0}#{subregion || 0}#{country || 0}#{province || 0}", ref_id: Ecto.UUID.generate(), continent: continent, subregion: subregion, country: country, province: province })
                 |> assert_insert(:ok)
         end
 
@@ -61,7 +85,7 @@ defmodule Bonbon.Model.Cuisine.RegionTest do
             subregion <- [nil, 1],
             country <- [nil, 1],
             province <- [nil, 1] do
-                assert_change(%Region.Model{}, %{ continent: continent, subregion: subregion, country: country, province: province })
+                assert_change(%Region.Model{}, %{ ref: @valid_model.ref <> "2#{continent || 0}#{subregion || 0}#{country || 0}#{province || 0}", ref_id: Ecto.UUID.generate(), continent: continent, subregion: subregion, country: country, province: province })
                 |> assert_insert(:error)
                 |> assert_error_value(:region, { "has already been taken", [] })
         end
@@ -79,7 +103,7 @@ defmodule Bonbon.Model.Cuisine.RegionTest do
         en_province = Fondant.Service.Repo.insert!(Region.Translation.Province.Model.changeset(%Region.Translation.Province.Model{}, %{ translate_id: 1, locale_id: en.id, term: "estuaire" }))
         _fr_province = Fondant.Service.Repo.insert!(Region.Translation.Province.Model.changeset(%Region.Translation.Province.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "estuaire" }))
 
-        _region = Fondant.Service.Repo.insert!(Region.Model.changeset(%Region.Model{}, %{ continent: en_continent.translate_id, subregion: en_subregion.translate_id, country: en_country.translate_id, province: en_province.translate_id }))
+        _region = Fondant.Service.Repo.insert!(Region.Model.changeset(%Region.Model{}, %{ ref: "estuaire", ref_id: Ecto.UUID.generate(), continent: en_continent.translate_id, subregion: en_subregion.translate_id, country: en_country.translate_id, province: en_province.translate_id }))
 
         query = from region in Region.Model,
             locale: ^en.id,
