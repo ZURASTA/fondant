@@ -710,5 +710,19 @@ defmodule Fondant.Service.Filter.Type.CuisineTest do
             assert 0 == page
             assert [] == results
         end
+
+        test "region compatibility", %{ id: %{ bar: bar_id }, data: cuisine } do
+            { :ok, { [region], _ } } = Region.find([continent: "b"], [locale: "aa"])
+            assert { :ok, { cuisine.bar.aa, bar_id } } == Cuisine.find([region: [id: region.id]], [locale: "aa", limit: 10])
+
+            { :ok, { [region], _ } } = Region.find([subregion: "b"], [locale: "aa"])
+            assert { :ok, { cuisine.bar.aa, bar_id } } == Cuisine.find([region: [id: region.id]], [locale: "aa", limit: 10])
+
+            { :ok, { [region], _ } } = Region.find([country: "b"], [locale: "aa"])
+            assert { :ok, { cuisine.bar.aa, bar_id } } == Cuisine.find([region: [id: region.id]], [locale: "aa", limit: 10])
+
+            { :ok, { [region], _ } } = Region.find([province: "b"], [locale: "aa"])
+            assert { :ok, { cuisine.bar.aa, bar_id } } == Cuisine.find([region: [id: region.id]], [locale: "aa", limit: 10])
+        end
     end
 end
