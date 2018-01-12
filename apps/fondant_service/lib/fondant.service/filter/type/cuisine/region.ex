@@ -16,14 +16,14 @@ defmodule Fondant.Service.Filter.Type.Cuisine.Region do
             nil -> { :error, "Invalid locale" }
             locale ->
                 query = from region in Region.Model,
-                    where: region.id == ^id,
+                    where: region.ref_id == ^id,
                     locale: ^locale,
                     translate: continent in region.continent,
                     translate: subregion in region.subregion,
                     translate: country in region.country,
                     translate: province in region.province,
                     select: %{
-                        id: region.id,
+                        id: region.ref_id,
                         continent: continent.term,
                         subregion: subregion.term,
                         country: country.term,
@@ -73,11 +73,12 @@ defmodule Fondant.Service.Filter.Type.Cuisine.Region do
             where: region.id > ^options[:page],
             locale_match: [continent, subregion, country, province],
             select: %{
-                id: region.id,
+                id: region.ref_id,
                 continent: continent.term,
                 subregion: subregion.term,
                 country: country.term,
-                province: province.term
+                province: province.term,
+                page: region.id
             }
     end
 
@@ -93,7 +94,7 @@ defmodule Fondant.Service.Filter.Type.Cuisine.Region do
                         case Fondant.Service.Repo.all(query_all(query, options)) do
                             nil -> { :error, "Could not retrieve any regions" }
                             [] -> { :ok, { [], options[:page] } }
-                            result -> { :ok, { Enum.map(result, &Map.merge(%Fondant.Filter.Cuisine.Region{}, &1)), List.last(result).id } }
+                            result -> { :ok, { Enum.map(result, &Map.merge(%Fondant.Filter.Cuisine.Region{}, Map.delete(&1, :page))), List.last(result).page } }
                         end
                 end
         end

@@ -5,7 +5,7 @@ defmodule Fondant.Filter.Cuisine.Region do
       ##Fields
 
       ###:id
-      Is the unique id to reference this filter. Is an `integer`.
+      Is the unique id to reference this filter. Is a `string`.
 
       ###:continent
       Is the localised continent of the cuisine region. Is a `string`.
@@ -29,7 +29,7 @@ defmodule Fondant.Filter.Cuisine.Region do
     ]
 
     @type t :: %Fondant.Filter.Cuisine.Region{
-        id: integer,
+        id: String.t,
         continent: String.t,
         subregion: String.t | nil,
         country: String.t | nil,

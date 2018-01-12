@@ -56,22 +56,23 @@ defmodule Fondant.API.Filter.Cuisine.RegionTest do
         {
             :ok,
             %{
-                id: %{ foo: foo.id, foobar: foobar.id, bar: bar.id },
+                id: %{ foo: foo.ref_id, foobar: foobar.ref_id, bar: bar.ref_id },
+                page: %{ foo: foo.id, foobar: foobar.id, bar: bar.id },
                 data: %{
                     foo: %{
-                        aa: %Fondant.Filter.Cuisine.Region{ id: foo.id, continent: "foo_continent_aa", subregion: "foo_subregion_aa", country: "foo_country_aa", province: "foo_province_aa" },
-                        zz: %Fondant.Filter.Cuisine.Region{ id: foo.id, continent: "foo_continent_zz", subregion: "foo_subregion_zz", country: "foo_country_zz", province: "foo_province_zz" },
-                        aa_bb: %Fondant.Filter.Cuisine.Region{ id: foo.id, continent: "foo_continent_aa_bb", subregion: "foo_subregion_aa_bb", country: "foo_country_aa_bb", province: "foo_province_aa_bb" }
+                        aa: %Fondant.Filter.Cuisine.Region{ id: foo.ref_id, continent: "foo_continent_aa", subregion: "foo_subregion_aa", country: "foo_country_aa", province: "foo_province_aa" },
+                        zz: %Fondant.Filter.Cuisine.Region{ id: foo.ref_id, continent: "foo_continent_zz", subregion: "foo_subregion_zz", country: "foo_country_zz", province: "foo_province_zz" },
+                        aa_bb: %Fondant.Filter.Cuisine.Region{ id: foo.ref_id, continent: "foo_continent_aa_bb", subregion: "foo_subregion_aa_bb", country: "foo_country_aa_bb", province: "foo_province_aa_bb" }
                     },
                     foobar: %{
-                        aa: %Fondant.Filter.Cuisine.Region{ id: foobar.id, continent: "foobar_continent_aa", subregion: "foobar_subregion_aa", country: "foobar_country_aa", province: "foobar_province_aa" },
-                        zz: %Fondant.Filter.Cuisine.Region{ id: foobar.id, continent: "foobar_continent_zz", subregion: "foobar_subregion_zz", country: "foobar_country_zz", province: "foobar_province_zz" },
-                        aa_bb: %Fondant.Filter.Cuisine.Region{ id: foobar.id, continent: "foobar_continent_aa_bb", subregion: "foobar_subregion_aa_bb", country: "foobar_country_aa_bb", province: "foobar_province_aa_bb" }
+                        aa: %Fondant.Filter.Cuisine.Region{ id: foobar.ref_id, continent: "foobar_continent_aa", subregion: "foobar_subregion_aa", country: "foobar_country_aa", province: "foobar_province_aa" },
+                        zz: %Fondant.Filter.Cuisine.Region{ id: foobar.ref_id, continent: "foobar_continent_zz", subregion: "foobar_subregion_zz", country: "foobar_country_zz", province: "foobar_province_zz" },
+                        aa_bb: %Fondant.Filter.Cuisine.Region{ id: foobar.ref_id, continent: "foobar_continent_aa_bb", subregion: "foobar_subregion_aa_bb", country: "foobar_country_aa_bb", province: "foobar_province_aa_bb" }
                     },
                     bar: %{
-                        aa: %Fondant.Filter.Cuisine.Region{ id: bar.id, continent: "bar_continent_aa", subregion: "bar_subregion_aa", country: "bar_country_aa", province: "bar_province_aa" },
-                        zz: %Fondant.Filter.Cuisine.Region{ id: bar.id, continent: "bar_continent_zz", subregion: "bar_subregion_zz", country: "bar_country_zz", province: "bar_province_zz" },
-                        aa_bb: %Fondant.Filter.Cuisine.Region{ id: bar.id, continent: "bar_continent_aa_bb", subregion: "bar_subregion_aa_bb", country: "bar_country_aa_bb", province: "bar_province_aa_bb" }
+                        aa: %Fondant.Filter.Cuisine.Region{ id: bar.ref_id, continent: "bar_continent_aa", subregion: "bar_subregion_aa", country: "bar_country_aa", province: "bar_province_aa" },
+                        zz: %Fondant.Filter.Cuisine.Region{ id: bar.ref_id, continent: "bar_continent_zz", subregion: "bar_subregion_zz", country: "bar_country_zz", province: "bar_province_zz" },
+                        aa_bb: %Fondant.Filter.Cuisine.Region{ id: bar.ref_id, continent: "bar_continent_aa_bb", subregion: "bar_subregion_aa_bb", country: "bar_country_aa_bb", province: "bar_province_aa_bb" }
                     }
                 }
             }
@@ -84,17 +85,17 @@ defmodule Fondant.API.Filter.Cuisine.RegionTest do
 
     describe "get" do
         test "non-existent region" do
-            assert { :error, "Region does not exist" } == Region.get(0, "aa")
-            assert { :error, "Region does not exist" } == Region.get(0, "zz")
-            assert { :error, "Region does not exist" } == Region.get(0, "aa_BB")
+            assert { :error, "Region does not exist" } == Region.get(<<0 :: 128>>, "aa")
+            assert { :error, "Region does not exist" } == Region.get(<<0 :: 128>>, "zz")
+            assert { :error, "Region does not exist" } == Region.get(<<0 :: 128>>, "aa_BB")
         end
 
         test "non-existent locale" do
-            assert { :error, "Invalid locale" } == Region.get(0, "bb")
+            assert { :error, "Invalid locale" } == Region.get(<<0 :: 128>>, "bb")
         end
 
         test "non-existent translation" do
-            assert { :error, "Region does not exist" } == Region.get(0, "zz_BB")
+            assert { :error, "Region does not exist" } == Region.get(<<0 :: 128>>, "zz_BB")
         end
 
         test "existing region", %{ id: %{ foo: foo_id, foobar: foobar_id, bar: bar_id }, data: region } do
@@ -118,7 +119,7 @@ defmodule Fondant.API.Filter.Cuisine.RegionTest do
             assert { :error, "Invalid locale" } == Region.find([], [locale: "bb"])
         end
 
-        test "no queries", %{ id: %{ bar: bar_id }, data: region } do
+        test "no queries", %{ page: %{ bar: bar_id }, data: region } do
             assert { :ok, { results, page } } = Region.find([], [locale: "aa", limit: 10])
             assert bar_id == page
             assert Enum.sort([
@@ -147,7 +148,7 @@ defmodule Fondant.API.Filter.Cuisine.RegionTest do
             ]) == Enum.sort(results)
         end
 
-        test "pagination", %{ id: %{ foo: foo_id, foobar: foobar_id, bar: bar_id }, data: region } do
+        test "pagination", %{ page: %{ foo: foo_id, foobar: foobar_id, bar: bar_id }, data: region } do
             assert { :ok, { results, page } } = Region.find([], [locale: "aa", limit: 1])
             assert foo_id == page
             assert [
@@ -171,7 +172,7 @@ defmodule Fondant.API.Filter.Cuisine.RegionTest do
             assert [] == results
         end
 
-        test "query continent", %{ id: %{ foo: foo_id, foobar: foobar_id }, data: region } do
+        test "query continent", %{ page: %{ foo: foo_id, foobar: foobar_id }, data: region } do
             assert { :ok, { results, page } } = Region.find([continent: "f"], [locale: "aa", limit: 10])
             assert foobar_id == page
             assert Enum.sort([
@@ -249,7 +250,7 @@ defmodule Fondant.API.Filter.Cuisine.RegionTest do
             assert [] == results
         end
 
-        test "query subregion", %{ id: %{ foo: foo_id, foobar: foobar_id }, data: region } do
+        test "query subregion", %{ page: %{ foo: foo_id, foobar: foobar_id }, data: region } do
             assert { :ok, { results, page } } = Region.find([subregion: "f"], [locale: "aa", limit: 10])
             assert foobar_id == page
             assert Enum.sort([
@@ -327,7 +328,7 @@ defmodule Fondant.API.Filter.Cuisine.RegionTest do
             assert [] == results
         end
 
-        test "query country", %{ id: %{ foo: foo_id, foobar: foobar_id }, data: region } do
+        test "query country", %{ page: %{ foo: foo_id, foobar: foobar_id }, data: region } do
             assert { :ok, { results, page } } = Region.find([country: "f"], [locale: "aa", limit: 10])
             assert foobar_id == page
             assert Enum.sort([
@@ -405,7 +406,7 @@ defmodule Fondant.API.Filter.Cuisine.RegionTest do
             assert [] == results
         end
 
-        test "query province", %{ id: %{ foo: foo_id, foobar: foobar_id }, data: region } do
+        test "query province", %{ page: %{ foo: foo_id, foobar: foobar_id }, data: region } do
             assert { :ok, { results, page } } = Region.find([province: "f"], [locale: "aa", limit: 10])
             assert foobar_id == page
             assert Enum.sort([
@@ -483,7 +484,7 @@ defmodule Fondant.API.Filter.Cuisine.RegionTest do
             assert [] == results
         end
 
-        test "query any", %{ id: %{ foo: foo_id, foobar: foobar_id }, data: region } do
+        test "query any", %{ page: %{ foo: foo_id, foobar: foobar_id }, data: region } do
             assert { :ok, { results, page } } = Region.find([any: "f"], [locale: "aa", limit: 10])
             assert foobar_id == page
             assert Enum.sort([
@@ -600,7 +601,7 @@ defmodule Fondant.API.Filter.Cuisine.RegionTest do
             assert [] == results
         end
 
-        test "all queries", %{ id: %{ foobar: foobar_id }, data: region } do
+        test "all queries", %{ page: %{ foobar: foobar_id }, data: region } do
             assert { :ok, { results, page } } = Region.find([continent: "f", subregion: "foo", country: "fo", province: "f", any: "foob"], [locale: "aa", limit: 10])
             assert foobar_id == page
             assert [
