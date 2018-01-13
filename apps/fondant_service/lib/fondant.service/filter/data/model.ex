@@ -1,4 +1,4 @@
-defmodule Fondant.Service.Data.Model do
+defmodule Fondant.Service.Filter.Data.Model do
     use Ecto.Schema
     import Ecto
     import Ecto.Changeset

@@ -1,7 +1,7 @@
-defmodule Fondant.Service.Data.ModelTest do
+defmodule Fondant.Service.Filter.Data.ModelTest do
     use Fondant.Service.Case
 
-    alias Fondant.Service.Data
+    alias Fondant.Service.Filter.Data
 
     @valid_model %Data.Model{ timestamp: "0" }
 
