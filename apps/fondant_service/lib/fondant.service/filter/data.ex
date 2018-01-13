@@ -39,4 +39,20 @@ defmodule Fondant.Service.Filter.Data do
                 { :error, "Failed clean the database" }
         end
     end
+
+    defp ref_id(timestamp, index) when timestamp <= 4611686018427387903 and index <= 281474976710655, do: UUID.binary_to_string!(<<index :: 48, 4 :: 4, 0 :: 12, 2 :: 2, timestamp :: 62>>)
+
+    defp get_migration(path, type, timestamp \\ -1) do
+        Yum.Data.reduce_migrations(%Yum.Migration{}, type, fn
+            migration = %{ "add" => add, "timestamp" => timestamp }, acc ->
+                timestamp = String.to_integer(timestamp)
+
+                add = Stream.iterate(0, &(&1 + 1))
+                |> Stream.map(&ref_id(timestamp, &1))
+                |> Enum.zip(add)
+
+                Yum.Migration.merge(Yum.Migration.new(%{ migration | "add" => add }), acc)
+            migration, acc -> Yum.Migration.merge(Yum.Migration.new(migration), acc)
+        end, timestamp, path)
+    end
 end

@@ -54,6 +54,7 @@ defmodule Fondant.Service.Mixfile do
             { :translecto, "~> 0.3.1" },
             { :like_sanitizer, "~> 0.1" },
             { :yum, github: "ZURASTA/yum" },
+            { :uuid, "~> 1.1" },
             { :protecto, github: "ScrimpyCat/Protecto" },
             { :defecto, github: "ScrimpyCat/Defecto", only: :test }
         ]
