@@ -72,22 +72,22 @@ defmodule Fondant.Service.Filter.Type.CuisineTest do
             :ok,
             %{
                 id: %{ foo: foo.id, foobar: foobar.id, bar: bar.id },
-                region_id: %{ foo: region_foo.id, foobar: region_foobar.id, bar: region_bar.id },
+                region_id: %{ foo: region_foo.ref_id, foobar: region_foobar.ref_id, bar: region_bar.ref_id },
                 data: %{
                     foo: %{
-                        aa: %Fondant.Filter.Cuisine{ id: foo.id, name: "foo_name_aa", region: %Fondant.Filter.Cuisine.Region{ id: region_foo.id, continent: "foo_continent_aa", subregion: "foo_subregion_aa", country: "foo_country_aa", province: "foo_province_aa" } },
-                        zz: %Fondant.Filter.Cuisine{ id: foo.id, name: "foo_name_zz", region: %Fondant.Filter.Cuisine.Region{ id: region_foo.id, continent: "foo_continent_zz", subregion: "foo_subregion_zz", country: "foo_country_zz", province: "foo_province_zz" } },
-                        aa_bb: %Fondant.Filter.Cuisine{ id: foo.id, name: "foo_name_aa_bb", region: %Fondant.Filter.Cuisine.Region{ id: region_foo.id, continent: "foo_continent_aa_bb", subregion: "foo_subregion_aa_bb", country: "foo_country_aa_bb", province: "foo_province_aa_bb" } }
+                        aa: %Fondant.Filter.Cuisine{ id: foo.id, name: "foo_name_aa", region: %Fondant.Filter.Cuisine.Region{ id: region_foo.ref_id, continent: "foo_continent_aa", subregion: "foo_subregion_aa", country: "foo_country_aa", province: "foo_province_aa" } },
+                        zz: %Fondant.Filter.Cuisine{ id: foo.id, name: "foo_name_zz", region: %Fondant.Filter.Cuisine.Region{ id: region_foo.ref_id, continent: "foo_continent_zz", subregion: "foo_subregion_zz", country: "foo_country_zz", province: "foo_province_zz" } },
+                        aa_bb: %Fondant.Filter.Cuisine{ id: foo.id, name: "foo_name_aa_bb", region: %Fondant.Filter.Cuisine.Region{ id: region_foo.ref_id, continent: "foo_continent_aa_bb", subregion: "foo_subregion_aa_bb", country: "foo_country_aa_bb", province: "foo_province_aa_bb" } }
                     },
                     foobar: %{
-                        aa: %Fondant.Filter.Cuisine{ id: foobar.id, name: "foobar_name_aa", region: %Fondant.Filter.Cuisine.Region{ id: region_foobar.id, continent: "foobar_continent_aa", subregion: "foobar_subregion_aa", country: "foobar_country_aa", province: "foobar_province_aa" } },
-                        zz: %Fondant.Filter.Cuisine{ id: foobar.id, name: "foobar_name_zz", region: %Fondant.Filter.Cuisine.Region{ id: region_foobar.id, continent: "foobar_continent_zz", subregion: "foobar_subregion_zz", country: "foobar_country_zz", province: "foobar_province_zz" } },
-                        aa_bb: %Fondant.Filter.Cuisine{ id: foobar.id, name: "foobar_name_aa_bb", region: %Fondant.Filter.Cuisine.Region{ id: region_foobar.id, continent: "foobar_continent_aa_bb", subregion: "foobar_subregion_aa_bb", country: "foobar_country_aa_bb", province: "foobar_province_aa_bb" } }
+                        aa: %Fondant.Filter.Cuisine{ id: foobar.id, name: "foobar_name_aa", region: %Fondant.Filter.Cuisine.Region{ id: region_foobar.ref_id, continent: "foobar_continent_aa", subregion: "foobar_subregion_aa", country: "foobar_country_aa", province: "foobar_province_aa" } },
+                        zz: %Fondant.Filter.Cuisine{ id: foobar.id, name: "foobar_name_zz", region: %Fondant.Filter.Cuisine.Region{ id: region_foobar.ref_id, continent: "foobar_continent_zz", subregion: "foobar_subregion_zz", country: "foobar_country_zz", province: "foobar_province_zz" } },
+                        aa_bb: %Fondant.Filter.Cuisine{ id: foobar.id, name: "foobar_name_aa_bb", region: %Fondant.Filter.Cuisine.Region{ id: region_foobar.ref_id, continent: "foobar_continent_aa_bb", subregion: "foobar_subregion_aa_bb", country: "foobar_country_aa_bb", province: "foobar_province_aa_bb" } }
                     },
                     bar: %{
-                        aa: %Fondant.Filter.Cuisine{ id: bar.id, name: "bar_name_aa", region: %Fondant.Filter.Cuisine.Region{ id: region_bar.id, continent: "bar_continent_aa", subregion: "bar_subregion_aa", country: "bar_country_aa", province: "bar_province_aa" } },
-                        zz: %Fondant.Filter.Cuisine{ id: bar.id, name: "bar_name_zz", region: %Fondant.Filter.Cuisine.Region{ id: region_bar.id, continent: "bar_continent_zz", subregion: "bar_subregion_zz", country: "bar_country_zz", province: "bar_province_zz" } },
-                        aa_bb: %Fondant.Filter.Cuisine{ id: bar.id, name: "bar_name_aa_bb", region: %Fondant.Filter.Cuisine.Region{ id: region_bar.id, continent: "bar_continent_aa_bb", subregion: "bar_subregion_aa_bb", country: "bar_country_aa_bb", province: "bar_province_aa_bb" } }
+                        aa: %Fondant.Filter.Cuisine{ id: bar.id, name: "bar_name_aa", region: %Fondant.Filter.Cuisine.Region{ id: region_bar.ref_id, continent: "bar_continent_aa", subregion: "bar_subregion_aa", country: "bar_country_aa", province: "bar_province_aa" } },
+                        zz: %Fondant.Filter.Cuisine{ id: bar.id, name: "bar_name_zz", region: %Fondant.Filter.Cuisine.Region{ id: region_bar.ref_id, continent: "bar_continent_zz", subregion: "bar_subregion_zz", country: "bar_country_zz", province: "bar_province_zz" } },
+                        aa_bb: %Fondant.Filter.Cuisine{ id: bar.id, name: "bar_name_aa_bb", region: %Fondant.Filter.Cuisine.Region{ id: region_bar.ref_id, continent: "bar_continent_aa_bb", subregion: "bar_subregion_aa_bb", country: "bar_country_aa_bb", province: "bar_province_aa_bb" } }
                     }
                 }
             }
@@ -445,15 +445,15 @@ defmodule Fondant.Service.Filter.Type.CuisineTest do
                 cuisine.foo.aa_bb
             ]) == Enum.sort(results)
 
-            assert { :ok, { results, page } } = Cuisine.find([region: [id: 0]], [locale: "aa", limit: 10])
+            assert { :ok, { results, page } } = Cuisine.find([region: [id: <<0 :: 128>>]], [locale: "aa", limit: 10])
             assert 0 == page
             assert [] == results
 
-            assert { :ok, { results, page } } = Cuisine.find([region: [id: 0]], [locale: "zz", limit: 10])
+            assert { :ok, { results, page } } = Cuisine.find([region: [id: <<0 :: 128>>]], [locale: "zz", limit: 10])
             assert 0 == page
             assert [] == results
 
-            assert { :ok, { results, page } } = Cuisine.find([region: [id: 0]], [locale: "aa_BB", limit: 10])
+            assert { :ok, { results, page } } = Cuisine.find([region: [id: <<0 :: 128>>]], [locale: "aa_BB", limit: 10])
             assert 0 == page
             assert [] == results
 
@@ -505,15 +505,15 @@ defmodule Fondant.Service.Filter.Type.CuisineTest do
             assert 0 == page
             assert [] == results
 
-            assert { :ok, { results, page } } = Cuisine.find([region: [id: 0], region: [id: -1]], [locale: "aa", limit: 10])
+            assert { :ok, { results, page } } = Cuisine.find([region: [id: <<0 :: 128>>], region: [id: <<-1 :: 128>>]], [locale: "aa", limit: 10])
             assert 0 == page
             assert [] == results
 
-            assert { :ok, { results, page } } = Cuisine.find([region: [id: 0], region: [id: -1]], [locale: "zz", limit: 10])
+            assert { :ok, { results, page } } = Cuisine.find([region: [id: <<0 :: 128>>], region: [id: <<-1 :: 128>>]], [locale: "zz", limit: 10])
             assert 0 == page
             assert [] == results
 
-            assert { :ok, { results, page } } = Cuisine.find([region: [id: 0], region: [id: -1]], [locale: "aa_BB", limit: 10])
+            assert { :ok, { results, page } } = Cuisine.find([region: [id: <<0 :: 128>>], region: [id: <<-1 :: 128>>]], [locale: "aa_BB", limit: 10])
             assert 0 == page
             assert [] == results
 
@@ -712,17 +712,20 @@ defmodule Fondant.Service.Filter.Type.CuisineTest do
         end
 
         test "region compatibility", %{ id: %{ bar: bar_id }, data: cuisine } do
+            { :ok, %Fondant.Filter.Cuisine{ region: region } } = Cuisine.get(bar_id, "aa")
+            assert { :ok, region } == Region.get(region.id, "aa")
+
             { :ok, { [region], _ } } = Region.find([continent: "b"], [locale: "aa"])
-            assert { :ok, { cuisine.bar.aa, bar_id } } == Cuisine.find([region: [id: region.id]], [locale: "aa", limit: 10])
+            assert { :ok, { [cuisine.bar.aa], bar_id } } == Cuisine.find([region: [id: region.id]], [locale: "aa", limit: 10])
 
             { :ok, { [region], _ } } = Region.find([subregion: "b"], [locale: "aa"])
-            assert { :ok, { cuisine.bar.aa, bar_id } } == Cuisine.find([region: [id: region.id]], [locale: "aa", limit: 10])
+            assert { :ok, { [cuisine.bar.aa], bar_id } } == Cuisine.find([region: [id: region.id]], [locale: "aa", limit: 10])
 
             { :ok, { [region], _ } } = Region.find([country: "b"], [locale: "aa"])
-            assert { :ok, { cuisine.bar.aa, bar_id } } == Cuisine.find([region: [id: region.id]], [locale: "aa", limit: 10])
+            assert { :ok, { [cuisine.bar.aa], bar_id } } == Cuisine.find([region: [id: region.id]], [locale: "aa", limit: 10])
 
             { :ok, { [region], _ } } = Region.find([province: "b"], [locale: "aa"])
-            assert { :ok, { cuisine.bar.aa, bar_id } } == Cuisine.find([region: [id: region.id]], [locale: "aa", limit: 10])
+            assert { :ok, { [cuisine.bar.aa], bar_id } } == Cuisine.find([region: [id: region.id]], [locale: "aa", limit: 10])
         end
     end
 end

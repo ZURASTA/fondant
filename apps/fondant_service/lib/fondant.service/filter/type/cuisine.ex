@@ -28,7 +28,7 @@ defmodule Fondant.Service.Filter.Type.Cuisine do
                         id: cuisine.id,
                         name: name.term,
                         region: %{
-                            id: region.id,
+                            id: region.ref_id,
                             continent: continent.term,
                             subregion: subregion.term,
                             country: country.term,
@@ -59,7 +59,7 @@ defmodule Fondant.Service.Filter.Type.Cuisine do
     end
     defp query_all([{ :region, region }|args], options) do
         Enum.reduce(region, query_all(args, options), fn
-            { :id, id }, query -> where(query, [i, cn, r, c, s, n, p], r.id == ^id)
+            { :id, id }, query -> where(query, [i, cn, r, c, s, n, p], r.ref_id == ^id)
             { :continent, continent }, query -> where(query, [i, cn, r, c, s, n, p], ilike(c.term, ^(LikeSanitizer.escape(continent) <> "%")))
             { :subregion, subregion }, query -> where(query, [i, cn, r, c, s, n, p], ilike(s.term, ^(LikeSanitizer.escape(subregion) <> "%")))
             { :country, country }, query -> where(query, [i, cn, r, c, s, n, p], ilike(n.term, ^(LikeSanitizer.escape(country) <> "%")))
@@ -82,7 +82,7 @@ defmodule Fondant.Service.Filter.Type.Cuisine do
                 id: cuisine.id,
                 name: name.term,
                 region: %{
-                    id: region.id,
+                    id: region.ref_id,
                     continent: continent.term,
                     subregion: subregion.term,
                     country: country.term,
