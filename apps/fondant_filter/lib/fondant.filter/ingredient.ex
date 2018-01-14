@@ -5,7 +5,7 @@ defmodule Fondant.Filter.Ingredient do
       ##Fields
 
       ###:id
-      Is the unique id to reference this filter. Is an `integer`.
+      Is the unique id to reference this filter. Is a `Fondant.Filter.id`.
 
       ###:name
       Is the localised name of the ingredient. Is a `string`.
@@ -21,7 +21,7 @@ defmodule Fondant.Filter.Ingredient do
     ]
 
     @type t :: %Fondant.Filter.Ingredient{
-        id: String.t,
+        id: Fondant.Filter.id,
         name: String.t,
         type: String.t | nil
     }

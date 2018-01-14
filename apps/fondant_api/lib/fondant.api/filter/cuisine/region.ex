@@ -16,7 +16,7 @@ defmodule Fondant.API.Filter.Cuisine.Region do
       Returns `{ :ok, region_filter }` if the operation was successful, otherwise returns
       an error.
     """
-    @spec get(String.t, Filter.locale) :: { :ok, Fondant.Filter.Cuisine.Region.t } | { :error, String.t }
+    @spec get(Fondant.Filter.id, Filter.locale) :: { :ok, Fondant.Filter.Cuisine.Region.t } | { :error, String.t }
     def get(id, locale) do
         GenServer.call(@service, { :get, { @filter_type, id, locale } })
     end
