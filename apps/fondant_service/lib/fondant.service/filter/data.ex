@@ -57,4 +57,37 @@ defmodule Fondant.Service.Filter.Data do
             migration, acc -> Yum.Migration.merge(Yum.Migration.new(migration), acc)
         end, timestamp, path)
     end
+
+    @spec find_ref(String.t, Ecto.Queryable.t) :: Ecto.Queryable.t
+    defp find_ref(ref, model) do
+        query = from item in model,
+            where: item.ref == ^ref
+    end
+
+    @spec run(Yum.Migration.t, module) :: :ok | { :error, String.t }
+    defp run(migration, type) do
+        model = Module.safe_concat(type, Model)
+
+        Yum.Migration.transactions(migration)
+        |> Enum.reduce(Ecto.Multi.new(), fn
+            { :move, { old_ref, new_ref } }, transaction -> Ecto.Multi.update_all(transaction, { :move_ref, { old_ref, new_ref } }, find_ref(old_ref, model), [set: [ref: new_ref]])
+            { :delete, ref }, transaction ->
+                Enum.reduce(model.translations(), transaction, fn { field, translation_model }, transaction ->
+                    query = from translation in translation_model,
+                        join: item in ^model, on: item.ref == ^ref,
+                        where: field(item, ^field) == translation.translate_id
+
+                    Ecto.Multi.delete_all(transaction, { :delete_translation, { ref, translation_model } }, query)
+                end)
+                |> Ecto.Multi.delete_all({ :delete_ref, ref }, find_ref(ref, model))
+        end)
+        |> Fondant.Service.Repo.transaction
+        |> case do
+            { :ok, _ } -> :ok
+            { :error, operation, value, _ } ->
+                Logger.debug("change #{inspect(operation)} (#{migration.timestamp}): #{inspect(value)}")
+                { :error, "Failed to run migration (#{migration.timestamp})" }
+            _ -> { :error, "Failed to run migration (#{migration.timestamp})"}
+        end
+    end
 end
