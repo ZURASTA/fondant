@@ -51,7 +51,7 @@ defmodule Fondant.Service.Mixfile do
         [
             { :ecto, "~> 2.1" },
             { :postgrex, "~> 0.13.2" },
-            { :translecto, "~> 0.3.1" },
+            { :translecto, "~> 0.3.2" },
             { :like_sanitizer, "~> 0.1" },
             { :yum, github: "ZURASTA/yum" },
             { :uuid, "~> 1.1" },
