@@ -90,7 +90,7 @@ defmodule Fondant.Service.Filter.Data do
                 translation_fields = get_translations.(path, &(&1 == file))
 
                 Enum.reduce(translation_fields, transaction, fn { translation_field, translations }, transaction ->
-                    translation_model = Module.safe_concat(type, Translation.Name.Model)
+                    translation_model = Module.safe_concat([type, Translation, atom_to_module(translation_field), Model])
                     translation_head = { :add_translation_head, { ref, translation_model, translation_field } }
 
                     case prepare_translation(translation_model, translations) do
@@ -129,5 +129,20 @@ defmodule Fondant.Service.Filter.Data do
                 { :error, "Failed to run migration (#{migration.timestamp})" }
             _ -> { :error, "Failed to run migration (#{migration.timestamp})"}
         end
+    end
+
+    @spec atom_to_module(atom) :: atom
+    defp atom_to_module(name) do
+        String.to_atom(format_as_module(to_string(name)))
+    end
+
+    @spec format_as_module(String.t) :: String.t
+    defp format_as_module(name) do
+        name
+        |> String.split(".")
+        |> Enum.map(fn module ->
+            String.split(module, "_") |> Enum.map(&String.capitalize(&1)) |> Enum.join
+        end)
+        |> Enum.join(".")
     end
 end
