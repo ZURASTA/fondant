@@ -85,6 +85,40 @@ defmodule Fondant.Service.Filter.Data do
 
         Yum.Migration.transactions(migration)
         |> Enum.reduce(Ecto.Multi.new(), fn
+            { :update, ref }, transaction ->
+                file = Enum.join([""|String.split(ref, "/", trim: true)], "/")
+                translation_fields = get_translations.(path, &(&1 == file))
+
+                transaction = Enum.reduce(model.translations(), transaction, fn { field, translation_model }, transaction ->
+                    query = from translation in translation_model,
+                        join: item in ^model, on: item.ref == ^ref,
+                        where: field(item, ^field) == translation.translate_id
+
+                    Ecto.Multi.delete_all(transaction, { :delete_translation, { ref, translation_model } }, query)
+                end)
+
+                Enum.reduce(translation_fields, transaction, fn { translation_field, translations }, transaction ->
+                    translation_model = Module.safe_concat([type, Translation, atom_to_module(translation_field), Model])
+                    translation_head = { :add_translation_head, { ref, translation_model, translation_field } }
+
+                    case prepare_translation(translation_model, translations) do
+                        [] -> transaction
+                        [translation] -> Ecto.Multi.insert(transaction, translation_head, translation_model.changeset(struct(translation_model), Map.new(translation)))
+                        [translation|translations] ->
+                            Ecto.Multi.insert(transaction, translation_head, translation_model.changeset(struct(translation_model), Map.new(translation)))
+                            |> Ecto.Multi.merge(fn changes ->
+                                Ecto.Multi.insert_all(Ecto.Multi.new(), { :add_translation, { ref, translation_model } }, translation_model, Enum.map(translations, &([{ :translate_id, changes[translation_head].translate_id }|&1])))
+                            end)
+                    end
+                end)
+                |> Ecto.Multi.merge(fn changes ->
+                    translate_ids = Enum.reduce(changes, [], fn
+                        { { :add_translation_head, { ^ref, _, translation_field } }, %{ translate_id: translate_id } }, acc -> [{ translation_field, translate_id }|acc]
+                        _, acc -> acc
+                    end)
+
+                    Ecto.Multi.update_all(Ecto.Multi.new(), { :update_ref, ref }, find_ref(ref, model), [set: [{ :updated_at, DateTime.utc_now }|translate_ids]])
+                end)
             { :add, { id, ref } }, transaction ->
                 file = Enum.join([""|String.split(ref, "/", trim: true)], "/")
                 translation_fields = get_translations.(path, &(&1 == file))
