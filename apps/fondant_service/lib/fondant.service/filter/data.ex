@@ -79,6 +79,43 @@ defmodule Fondant.Service.Filter.Data do
         end)
     end
 
+    @spec translate_ids(map(), String.t) :: keyword(integer)
+    defp translate_ids(changes, ref) do
+        Enum.reduce(changes, [], fn
+            { { :add_translation_head, { ^ref, _, translation_field } }, %{ translate_id: translate_id } }, acc -> [{ translation_field, translate_id }|acc]
+            _, acc -> acc
+        end)
+    end
+
+    @spec insert_translations(Ecto.Multi.t, String.t, module, %{ optional(atom) => Yum.Data.translation_tree }) :: Ecto.Multi.t
+    defp insert_translations(transaction, ref, type, translation_fields) do
+        Enum.reduce(translation_fields, transaction, fn { translation_field, translations }, transaction ->
+            translation_model = Module.safe_concat([type, Translation, atom_to_module(translation_field), Model])
+            translation_head = { :add_translation_head, { ref, translation_model, translation_field } }
+
+            case prepare_translation(translation_model, translations) do
+                [] -> transaction
+                [translation] -> Ecto.Multi.insert(transaction, translation_head, translation_model.changeset(struct(translation_model), Map.new(translation)))
+                [translation|translations] ->
+                    Ecto.Multi.insert(transaction, translation_head, translation_model.changeset(struct(translation_model), Map.new(translation)))
+                    |> Ecto.Multi.merge(fn changes ->
+                        Ecto.Multi.insert_all(Ecto.Multi.new(), { :add_translation, { ref, translation_model } }, translation_model, Enum.map(translations, &([{ :translate_id, changes[translation_head].translate_id }|&1])))
+                    end)
+            end
+        end)
+    end
+
+    @spec delete_translations(Ecto.Multi.t, String.t, module) :: Ecto.Multi.t
+    defp delete_translations(transaction, ref, model) do
+        Enum.reduce(model.translations(), transaction, fn { field, translation_model }, transaction ->
+            query = from translation in translation_model,
+                join: item in ^model, on: item.ref == ^ref,
+                where: field(item, ^field) == translation.translate_id
+
+            Ecto.Multi.delete_all(transaction, { :delete_translation, { ref, translation_model } }, query)
+        end)
+    end
+
     @spec run(Yum.Migration.t, String.t, module, ((String.t, Yum.Data.file_filter) -> %{ optional(atom) => Yum.Data.translation_tree })) :: :ok | { :error, String.t }
     defp run(migration, path, type, get_translations) do
         model = Module.safe_concat(type, Model)
@@ -89,70 +126,18 @@ defmodule Fondant.Service.Filter.Data do
                 file = Enum.join([""|String.split(ref, "/", trim: true)], "/")
                 translation_fields = get_translations.(path, &(&1 == file))
 
-                transaction = Enum.reduce(model.translations(), transaction, fn { field, translation_model }, transaction ->
-                    query = from translation in translation_model,
-                        join: item in ^model, on: item.ref == ^ref,
-                        where: field(item, ^field) == translation.translate_id
-
-                    Ecto.Multi.delete_all(transaction, { :delete_translation, { ref, translation_model } }, query)
-                end)
-
-                Enum.reduce(translation_fields, transaction, fn { translation_field, translations }, transaction ->
-                    translation_model = Module.safe_concat([type, Translation, atom_to_module(translation_field), Model])
-                    translation_head = { :add_translation_head, { ref, translation_model, translation_field } }
-
-                    case prepare_translation(translation_model, translations) do
-                        [] -> transaction
-                        [translation] -> Ecto.Multi.insert(transaction, translation_head, translation_model.changeset(struct(translation_model), Map.new(translation)))
-                        [translation|translations] ->
-                            Ecto.Multi.insert(transaction, translation_head, translation_model.changeset(struct(translation_model), Map.new(translation)))
-                            |> Ecto.Multi.merge(fn changes ->
-                                Ecto.Multi.insert_all(Ecto.Multi.new(), { :add_translation, { ref, translation_model } }, translation_model, Enum.map(translations, &([{ :translate_id, changes[translation_head].translate_id }|&1])))
-                            end)
-                    end
-                end)
-                |> Ecto.Multi.merge(fn changes ->
-                    translate_ids = Enum.reduce(changes, [], fn
-                        { { :add_translation_head, { ^ref, _, translation_field } }, %{ translate_id: translate_id } }, acc -> [{ translation_field, translate_id }|acc]
-                        _, acc -> acc
-                    end)
-
-                    Ecto.Multi.update_all(Ecto.Multi.new(), { :update_ref, ref }, find_ref(ref, model), [set: [{ :updated_at, DateTime.utc_now }|translate_ids]])
-                end)
+                delete_translations(transaction, ref, model)
+                |> insert_translations(ref, type, translation_fields)
+                |> Ecto.Multi.merge(&Ecto.Multi.update_all(Ecto.Multi.new(), { :update_ref, ref }, find_ref(ref, model), [set: [{ :updated_at, DateTime.utc_now }|translate_ids(&1, ref)]]))
             { :add, { id, ref } }, transaction ->
                 file = Enum.join([""|String.split(ref, "/", trim: true)], "/")
                 translation_fields = get_translations.(path, &(&1 == file))
 
-                Enum.reduce(translation_fields, transaction, fn { translation_field, translations }, transaction ->
-                    translation_model = Module.safe_concat([type, Translation, atom_to_module(translation_field), Model])
-                    translation_head = { :add_translation_head, { ref, translation_model, translation_field } }
-
-                    case prepare_translation(translation_model, translations) do
-                        [] -> transaction
-                        [translation] -> Ecto.Multi.insert(transaction, translation_head, translation_model.changeset(struct(translation_model), Map.new(translation)))
-                        [translation|translations] ->
-                            Ecto.Multi.insert(transaction, translation_head, translation_model.changeset(struct(translation_model), Map.new(translation)))
-                            |> Ecto.Multi.merge(fn changes ->
-                                Ecto.Multi.insert_all(Ecto.Multi.new(), { :add_translation, { ref, translation_model } }, translation_model, Enum.map(translations, &([{ :translate_id, changes[translation_head].translate_id }|&1])))
-                            end)
-                    end
-                end)
-                |> Ecto.Multi.merge(fn changes ->
-                    translate_ids = Enum.reduce(changes, [], fn
-                        { { :add_translation_head, { ^ref, _, translation_field } }, %{ translate_id: translate_id } }, acc -> [{ translation_field, translate_id }|acc]
-                        _, acc -> acc
-                    end)
-                    Ecto.Multi.insert(Ecto.Multi.new(), { :add_ref, ref }, model.changeset(struct(model), Map.merge(%{ ref: ref, ref_id: id }, Map.new(translate_ids))))
-                end)
+                insert_translations(transaction, ref, type, translation_fields)
+                |> Ecto.Multi.merge(&Ecto.Multi.insert(Ecto.Multi.new(), { :add_ref, ref }, model.changeset(struct(model), Map.merge(%{ ref: ref, ref_id: id }, Map.new(translate_ids(&1, ref))))))
             { :move, { old_ref, new_ref } }, transaction -> Ecto.Multi.update_all(transaction, { :move_ref, { old_ref, new_ref } }, find_ref(old_ref, model), [set: [ref: new_ref]])
             { :delete, ref }, transaction ->
-                Enum.reduce(model.translations(), transaction, fn { field, translation_model }, transaction ->
-                    query = from translation in translation_model,
-                        join: item in ^model, on: item.ref == ^ref,
-                        where: field(item, ^field) == translation.translate_id
-
-                    Ecto.Multi.delete_all(transaction, { :delete_translation, { ref, translation_model } }, query)
-                end)
+                delete_translations(transaction, ref, model)
                 |> Ecto.Multi.delete_all({ :delete_ref, ref }, find_ref(ref, model))
         end)
         |> Fondant.Service.Repo.transaction
