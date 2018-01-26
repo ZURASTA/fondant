@@ -60,22 +60,22 @@ defmodule Fondant.Service.Filter.Data do
 
     @spec find_ref(String.t, Ecto.Queryable.t) :: Ecto.Queryable.t
     defp find_ref(ref, model) do
-        query = from item in model,
+        from item in model,
             where: item.ref == ^ref
     end
 
-    @spec prepare_translation(module, Yum.Data.translation_tree | String.t, String.t, [String.t], [[term: String.t, locale_id: integer, inserted_at: DateTime.t, updated_at: DateTime.t]]) :: [[term: String.t, locale_id: integer, inserted_at: DateTime.t, updated_at: DateTime.t]]
-    defp prepare_translation(model, translation, field \\ "term", language \\ [], inserts \\ [])
-    defp prepare_translation(model, string, field, [field|language], inserts) when is_binary(string) do
+    @spec prepare_translation(Yum.Data.translation_tree | String.t, String.t, [String.t], [[term: String.t, locale_id: integer, inserted_at: DateTime.t, updated_at: DateTime.t]]) :: [[term: String.t, locale_id: integer, inserted_at: DateTime.t, updated_at: DateTime.t]]
+    defp prepare_translation(translation, field \\ "term", language \\ [], inserts \\ [])
+    defp prepare_translation(string, field, [field|language], inserts) when is_binary(string) do
         case Fondant.Service.Locale.to_locale_id(Enum.reverse(language) |> Enum.join("_")) do
             nil -> inserts
             locale -> [[term: string, locale_id: locale, inserted_at: DateTime.utc_now, updated_at: DateTime.utc_now]|inserts]
         end
     end
-    defp prepare_translation(_, string, _, _, inserts) when is_binary(string), do: inserts
-    defp prepare_translation(model, data, field, language, inserts) do
+    defp prepare_translation(string, _, _, inserts) when is_binary(string), do: inserts
+    defp prepare_translation(data, field, language, inserts) do
         Enum.reduce(data, inserts, fn { locale, translation }, inserts ->
-            prepare_translation(model, translation, field, [to_string(locale)|language], inserts)
+            prepare_translation(translation, field, [to_string(locale)|language], inserts)
         end)
     end
 
@@ -93,7 +93,7 @@ defmodule Fondant.Service.Filter.Data do
             translation_model = Module.safe_concat([type, Translation, atom_to_module(translation_field), Model])
             translation_head = { :add_translation_head, { ref, translation_model, translation_field } }
 
-            case prepare_translation(translation_model, translations) do
+            case prepare_translation(translations) do
                 [] -> transaction
                 [translation] -> Ecto.Multi.insert(transaction, translation_head, translation_model.changeset(struct(translation_model), Map.new(translation)))
                 [translation|translations] ->
