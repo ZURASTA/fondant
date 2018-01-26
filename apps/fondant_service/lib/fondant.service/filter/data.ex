@@ -44,7 +44,7 @@ defmodule Fondant.Service.Filter.Data do
     defp ref_id(timestamp, index) when timestamp <= 4611686018427387903 and index <= 281474976710655, do: UUID.binary_to_string!(<<index :: 48, 4 :: 4, 0 :: 12, 2 :: 2, timestamp :: 62>>)
 
     @spec get_migration(String.t, String.t, integer) :: Yum.Migration.t
-    defp get_migration(path, type, timestamp \\ -1) do
+    def get_migration(path, type, timestamp \\ -1) do
         Yum.Data.reduce_migrations(%Yum.Migration{}, type, fn
             migration = %{ "add" => add, "timestamp" => timestamp }, acc ->
                 timestamp = String.to_integer(timestamp)
@@ -56,6 +56,85 @@ defmodule Fondant.Service.Filter.Data do
                 Yum.Migration.merge(Yum.Migration.new(%{ migration | "add" => add }), acc)
             migration, acc -> Yum.Migration.merge(Yum.Migration.new(migration), acc)
         end, timestamp, path)
+    end
+
+    @spec migrate(String.t) :: :ok | { :error, String.t }
+    def migrate(path \\ "apps/fondant_service/priv/data") do
+        Ecto.Multi.new()
+        |> Ecto.Multi.run(:last_migration, fn _ ->
+            timestamp = case Fondant.Service.Repo.one(last(Filter.Data.Model)) do
+                nil -> -1
+                migration -> String.to_integer(migration.timestamp)
+            end
+
+            { :ok, timestamp }
+        end)
+        |> Ecto.Multi.merge(fn changes ->
+            timestamp = changes[:last_migration]
+
+            Ecto.Multi.new()
+            |> migrate_allergens(timestamp, path)
+            |> migrate_diets(timestamp, path)
+            |> migrate_ingredients(timestamp, path)
+        end)
+        |> Ecto.Multi.merge(fn changes ->
+            timestamp = Enum.reduce(changes, -1, fn
+                { { :new_timestamp, _ }, new_timestamp }, timestamp when new_timestamp > timestamp -> new_timestamp
+                _, timestamp -> timestamp
+            end)
+
+            if timestamp == -1 do
+                Ecto.Multi.error(Ecto.Multi.new(), :error_current, "Nothing to migrate")
+            else
+                Ecto.Multi.insert(Ecto.Multi.new(), :mark_migration, Filter.Data.Model.changeset(%Filter.Data.Model{}, %{ timestamp: to_string(timestamp) }))
+            end
+        end)
+        |> Fondant.Service.Repo.transaction
+        |> case do
+            { :ok, changes } ->
+                Logger.info("Migrated from (#{changes[:last_migration]}) to (#{changes[:mark_migration].timestamp})")
+                :ok
+            { :error, :error_current, value, _ } ->
+                Logger.debug("change #{:error_current}: #{inspect(value)}")
+                { :error, value }
+            { :error, operation, value, _ } ->
+                Logger.debug("change #{inspect(operation)}: #{inspect(value)}")
+                { :error, "Failed to run migration" }
+            _ -> { :error, "Failed to run migration" }
+        end
+    end
+
+    @spec migrate_allergens(Ecto.Multi.t, integer, String.t) :: Ecto.Multi.t
+    defp migrate_allergens(transaction, timestamp, data) do
+        get_migration(data, "allergens", timestamp)
+        |> run(transaction, data, Filter.Type.Allergen, fn path, file ->
+            Yum.Data.reduce_allergens(%{}, fn
+                { _, %{ "translation" => translations } }, _ -> %{ name: translations }
+                _, acc -> acc
+            end, path, &(&1 == file))
+        end)
+    end
+
+    @spec migrate_diets(Ecto.Multi.t, integer, String.t) :: Ecto.Multi.t
+    defp migrate_diets(transaction, timestamp, data) do
+        get_migration(data, "diets", timestamp)
+        |> run(transaction, data, Filter.Type.Diet, fn path, file ->
+            Yum.Data.reduce_diets(%{}, fn
+                { _, %{ "translation" => translations } }, _ -> %{ name: translations }
+                _, acc -> acc
+            end, path, &(&1 == file))
+        end)
+    end
+
+    @spec migrate_ingredients(Ecto.Multi.t, integer, String.t) :: Ecto.Multi.t
+    defp migrate_ingredients(transaction, timestamp, data) do
+        get_migration(data, "ingredients", timestamp)
+        |> run(transaction, data, Filter.Type.Cuisine, fn path, file ->
+            Yum.Data.reduce_ingredients(%{}, fn
+                { _, %{ "translation" => translations } }, _, _ -> %{ name: translations }
+                _, _, acc -> acc
+            end, "", path, &(&1 == file))
+        end)
     end
 
     @spec find_ref(String.t, Ecto.Queryable.t) :: Ecto.Queryable.t
@@ -116,38 +195,31 @@ defmodule Fondant.Service.Filter.Data do
         end)
     end
 
-    @spec run(Yum.Migration.t, String.t, module, ((String.t, Yum.Data.file_filter) -> %{ optional(atom) => Yum.Data.translation_tree })) :: :ok | { :error, String.t }
-    defp run(migration, path, type, get_translations) do
+    @spec run(Yum.Migration.t, Ecto.Multi.t, String.t, module, ((String.t, String.t) -> %{ optional(atom) => Yum.Data.translation_tree })) :: :ok | { :error, String.t }
+    defp run(migration, transaction, path, type, get_translations) do
         model = Module.safe_concat(type, Model)
 
         Yum.Migration.transactions(migration)
-        |> Enum.reduce(Ecto.Multi.new(), fn
+        |> Enum.reduce(transaction, fn
             { :update, ref }, transaction ->
                 file = Enum.join([""|String.split(ref, "/", trim: true)], "/")
-                translation_fields = get_translations.(path, &(&1 == file))
+                translation_fields = get_translations.(path, file)
 
                 delete_translations(transaction, ref, model)
                 |> insert_translations(ref, type, translation_fields)
-                |> Ecto.Multi.merge(&Ecto.Multi.update_all(Ecto.Multi.new(), { :update_ref, ref }, find_ref(ref, model), [set: [{ :updated_at, DateTime.utc_now }|translate_ids(&1, ref)]]))
+                |> Ecto.Multi.merge(&Ecto.Multi.update_all(Ecto.Multi.new(), { :update_ref, { ref, model } }, find_ref(ref, model), [set: [{ :updated_at, DateTime.utc_now }|translate_ids(&1, ref)]]))
             { :add, { id, ref } }, transaction ->
                 file = Enum.join([""|String.split(ref, "/", trim: true)], "/")
-                translation_fields = get_translations.(path, &(&1 == file))
+                translation_fields = get_translations.(path, file)
 
                 insert_translations(transaction, ref, type, translation_fields)
-                |> Ecto.Multi.merge(&Ecto.Multi.insert(Ecto.Multi.new(), { :add_ref, ref }, model.changeset(struct(model), Map.merge(%{ ref: ref, ref_id: id }, Map.new(translate_ids(&1, ref))))))
-            { :move, { old_ref, new_ref } }, transaction -> Ecto.Multi.update_all(transaction, { :move_ref, { old_ref, new_ref } }, find_ref(old_ref, model), [set: [ref: new_ref]])
+                |> Ecto.Multi.merge(&Ecto.Multi.insert(Ecto.Multi.new(), { :add_ref, { ref, model } }, model.changeset(struct(model), Map.merge(%{ ref: ref, ref_id: id }, Map.new(translate_ids(&1, ref))))))
+            { :move, { old_ref, new_ref } }, transaction -> Ecto.Multi.update_all(transaction, { :move_ref, { { old_ref, new_ref }, model } }, find_ref(old_ref, model), [set: [ref: new_ref]])
             { :delete, ref }, transaction ->
                 delete_translations(transaction, ref, model)
-                |> Ecto.Multi.delete_all({ :delete_ref, ref }, find_ref(ref, model))
+                |> Ecto.Multi.delete_all({ :delete_ref, { ref, model } }, find_ref(ref, model))
         end)
-        |> Fondant.Service.Repo.transaction
-        |> case do
-            { :ok, _ } -> :ok
-            { :error, operation, value, _ } ->
-                Logger.debug("change #{inspect(operation)} (#{migration.timestamp}): #{inspect(value)}")
-                { :error, "Failed to run migration (#{migration.timestamp})" }
-            _ -> { :error, "Failed to run migration (#{migration.timestamp})"}
-        end
+        |> Ecto.Multi.run({ :new_timestamp, type }, fn _ -> { :ok, migration.timestamp } end)
     end
 
     @spec atom_to_module(atom) :: atom
