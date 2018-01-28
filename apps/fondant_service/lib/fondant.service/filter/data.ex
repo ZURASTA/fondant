@@ -129,7 +129,7 @@ defmodule Fondant.Service.Filter.Data do
     @spec migrate_ingredients(Ecto.Multi.t, integer, String.t) :: Ecto.Multi.t
     defp migrate_ingredients(transaction, timestamp, data) do
         get_migration(data, "ingredients", timestamp)
-        |> run(transaction, data, Filter.Type.Cuisine, fn path, file ->
+        |> run(transaction, data, Filter.Type.Ingredient, fn path, file ->
             Yum.Data.reduce_ingredients(%{}, fn
                 { _, %{ "translation" => translations } }, _, _ -> %{ name: translations }
                 _, _, acc -> acc
