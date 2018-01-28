@@ -14,7 +14,7 @@ defmodule Fondant.Service.Filter.Type.Cuisine.Region.Model do
       Is the name of the resource. Is a `string`.
 
       ###:ref_id
-      Is the unique ID to externally reference the ingredient. Is an `uuid`.
+      Is the unique ID to externally reference the cuisine region. Is an `uuid`.
 
       ###:continent
       Is the continent of the region. Is a `translatable`.
