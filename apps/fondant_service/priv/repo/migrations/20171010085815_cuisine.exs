@@ -14,6 +14,12 @@ defmodule Fondant.Service.Repo.Migrations.Cuisine do
         end
 
         create table(:cuisines) do
+            add :ref, :string,
+                null: false
+
+            add :ref_id, :uuid,
+                null: false
+
             translate :name, null: false
 
             add :region_id, references(:cuisine_regions),
@@ -22,6 +28,8 @@ defmodule Fondant.Service.Repo.Migrations.Cuisine do
             timestamps()
         end
 
+        create index(:cuisines, [:ref], unique: true)
+        create index(:cuisines, [:ref_id], unique: true)
         create index(:cuisines, [:name], unique: true)
     end
 end

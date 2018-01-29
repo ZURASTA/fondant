@@ -4,10 +4,18 @@ defmodule Fondant.Service.Filter.Type.Cuisine.ModelTest do
 
     alias Fondant.Service.Filter.Type.Cuisine
 
-    @valid_model %Cuisine.Model{ name: 1, region_id: 1 }
+    @valid_model %Cuisine.Model{ ref: "test", ref_id: Ecto.UUID.generate(), name: 1, region_id: 1 }
 
     test "empty" do
         refute_change(%Cuisine.Model{})
+    end
+
+    test "only ref" do
+        refute_change(%Cuisine.Model{}, %{ ref: "test" })
+    end
+
+    test "only ref_id" do
+        refute_change(%Cuisine.Model{}, %{ ref_id: Ecto.UUID.generate() })
     end
 
     test "only name" do
@@ -16,6 +24,22 @@ defmodule Fondant.Service.Filter.Type.Cuisine.ModelTest do
 
     test "only region" do
         refute_change(%Cuisine.Model{}, %{ region_id: 1 })
+    end
+
+    test "without ref" do
+        refute_change(%Cuisine.Model{}, %{ ref_id: Ecto.UUID.generate(), name: 1, region_id: 1 })
+    end
+
+    test "without ref_id" do
+        refute_change(%Cuisine.Model{}, %{ ref: "test", name: 1, region_id: 1 })
+    end
+
+    test "without name" do
+        refute_change(%Cuisine.Model{}, %{ ref: "test", ref_id: Ecto.UUID.generate(), region_id: 1 })
+    end
+
+    test "without region_id" do
+        refute_change(%Cuisine.Model{}, %{ ref: "test", ref_id: Ecto.UUID.generate(), name: 1 })
     end
 
     test "uniqueness" do
@@ -35,22 +59,30 @@ defmodule Fondant.Service.Filter.Type.Cuisine.ModelTest do
 
         _cuisine = Fondant.Service.Repo.insert!(Cuisine.Model.changeset(@valid_model, %{ region_id: region.id }))
 
-        assert_change(%Cuisine.Model{}, %{ name: @valid_model.name + 1, region_id: region2.id + 1 })
+        assert_change(%Cuisine.Model{}, %{ ref: @valid_model.ref, ref_id: Ecto.UUID.generate(), name: @valid_model.name + 1, region_id: region.id })
+        |> assert_insert(:error)
+        |> assert_error_value(:ref, { "has already been taken", [] })
+
+        assert_change(%Cuisine.Model{}, %{ ref: @valid_model.ref <> "1", ref_id: @valid_model.ref_id, name: @valid_model.name + 1, region_id: region.id })
+        |> assert_insert(:error)
+        |> assert_error_value(:ref_id, { "has already been taken", [] })
+
+        assert_change(%Cuisine.Model{}, %{ ref: @valid_model.ref <> "1", ref_id: Ecto.UUID.generate(), name: @valid_model.name + 1, region_id: region2.id + 1 })
         |> assert_insert(:error)
         |> assert_error_value(:region, { "does not exist", [] })
 
-        assert_change(%Cuisine.Model{}, %{ name: @valid_model.name, region_id: region.id })
+        assert_change(%Cuisine.Model{}, %{ ref: @valid_model.ref <> "1", ref_id: Ecto.UUID.generate(), name: @valid_model.name, region_id: region.id })
         |> assert_insert(:error)
         |> assert_error_value(:name, { "has already been taken", [] })
 
-        assert_change(%Cuisine.Model{}, %{ name: @valid_model.name, region_id: region2.id })
+        assert_change(%Cuisine.Model{}, %{ ref: @valid_model.ref <> "1", ref_id: Ecto.UUID.generate(), name: @valid_model.name, region_id: region2.id })
         |> assert_insert(:error)
         |> assert_error_value(:name, { "has already been taken", [] })
 
-        assert_change(%Cuisine.Model{}, %{ name: @valid_model.name + 1, region_id: region.id })
+        assert_change(%Cuisine.Model{}, %{ ref: @valid_model.ref <> "1", ref_id: Ecto.UUID.generate(), name: @valid_model.name + 1, region_id: region.id })
         |> assert_insert(:ok)
 
-        assert_change(%Cuisine.Model{}, %{ name: @valid_model.name + 2, region_id: region2.id })
+        assert_change(%Cuisine.Model{}, %{ ref: @valid_model.ref <> "2", ref_id: Ecto.UUID.generate(), name: @valid_model.name + 2, region_id: region2.id })
         |> assert_insert(:ok)
     end
 
@@ -65,7 +97,7 @@ defmodule Fondant.Service.Filter.Type.Cuisine.ModelTest do
         en_pasta = Fondant.Service.Repo.insert!(Cuisine.Translation.Name.Model.changeset(%Cuisine.Translation.Name.Model{}, %{ translate_id: 1, locale_id: en.id, term: "pasta" }))
         _fr_pasta = Fondant.Service.Repo.insert!(Cuisine.Translation.Name.Model.changeset(%Cuisine.Translation.Name.Model{}, %{ translate_id: 1, locale_id: fr.id, term: "pâtes" }))
 
-        _cuisine_pasta = Fondant.Service.Repo.insert!(Cuisine.Model.changeset(%Cuisine.Model{}, %{ name: en_pasta.translate_id, region_id: region.id }))
+        _cuisine_pasta = Fondant.Service.Repo.insert!(Cuisine.Model.changeset(%Cuisine.Model{}, %{ ref: "pasta", ref_id: Ecto.UUID.generate(), name: en_pasta.translate_id, region_id: region.id }))
 
         query = from cuisine in Cuisine.Model,
             locale: ^en.id,

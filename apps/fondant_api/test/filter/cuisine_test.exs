@@ -64,9 +64,9 @@ defmodule Fondant.API.Filter.CuisineTest do
         region_foobar = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Cuisine.Region.Model{ ref: "foobar", ref_id: Ecto.UUID.generate(), continent: 2, subregion: 2 + 3, country: 2 + 6, province: 2 + 9 })
         region_bar = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Cuisine.Region.Model{ ref: "bar", ref_id: Ecto.UUID.generate(), continent: 3, subregion: 3 + 3, country: 3 + 6, province: 3 + 9 })
 
-        foo = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Cuisine.Model{ name: 1 + 12, region_id: region_foo.id })
-        foobar = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Cuisine.Model{ name: 2 + 12, region_id: region_foobar.id })
-        bar = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Cuisine.Model{ name: 3 + 12, region_id: region_bar.id })
+        foo = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Cuisine.Model{ ref: "foo", ref_id: Ecto.UUID.generate(), name: 1 + 12, region_id: region_foo.id })
+        foobar = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Cuisine.Model{ ref: "foobar", ref_id: Ecto.UUID.generate(), name: 2 + 12, region_id: region_foobar.id })
+        bar = Fondant.Service.Repo.insert!(%Fondant.Service.Filter.Type.Cuisine.Model{ ref: "bar", ref_id: Ecto.UUID.generate(), name: 3 + 12, region_id: region_bar.id })
 
         {
             :ok,
