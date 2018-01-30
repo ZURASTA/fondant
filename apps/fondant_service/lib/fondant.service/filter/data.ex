@@ -76,6 +76,7 @@ defmodule Fondant.Service.Filter.Data do
             |> migrate_allergens(timestamp, path)
             |> migrate_diets(timestamp, path)
             |> migrate_ingredients(timestamp, path)
+            |> migrate_cuisine_regions(timestamp, path)
         end)
         |> Ecto.Multi.merge(fn changes ->
             timestamp = Enum.reduce(changes, -1, fn
@@ -108,8 +109,8 @@ defmodule Fondant.Service.Filter.Data do
     defp migrate_allergens(transaction, timestamp, data) do
         get_migration(data, "allergens", timestamp)
         |> run(transaction, data, Filter.Type.Allergen, fn path, file ->
-            Yum.Data.reduce_allergens(%{}, fn
-                { _, %{ "translation" => translations } }, _ -> %{ name: translations }
+            Yum.Data.reduce_allergens([], fn
+                { _, %{ "translation" => translations } }, _ -> [name: translations]
                 _, acc -> acc
             end, path, &(&1 == file))
         end)
@@ -119,8 +120,8 @@ defmodule Fondant.Service.Filter.Data do
     defp migrate_diets(transaction, timestamp, data) do
         get_migration(data, "diets", timestamp)
         |> run(transaction, data, Filter.Type.Diet, fn path, file ->
-            Yum.Data.reduce_diets(%{}, fn
-                { _, %{ "translation" => translations } }, _ -> %{ name: translations }
+            Yum.Data.reduce_diets([], fn
+                { _, %{ "translation" => translations } }, _ -> [name: translations]
                 _, acc -> acc
             end, path, &(&1 == file))
         end)
@@ -130,10 +131,24 @@ defmodule Fondant.Service.Filter.Data do
     defp migrate_ingredients(transaction, timestamp, data) do
         get_migration(data, "ingredients", timestamp)
         |> run(transaction, data, Filter.Type.Ingredient, fn path, file ->
-            Yum.Data.reduce_ingredients(%{}, fn
-                { _, %{ "translation" => translations } }, _, _ -> %{ name: translations }
+            Yum.Data.reduce_ingredients([], fn
+                { _, %{ "translation" => translations } }, _, _ -> [name: translations]
                 _, _, acc -> acc
             end, "", path, &(&1 == file))
+        end)
+    end
+
+    @spec migrate_cuisine_regions(Ecto.Multi.t, integer, String.t) :: Ecto.Multi.t
+    defp migrate_cuisine_regions(transaction, timestamp, data) do
+        get_migration(data, "cuisines", timestamp)
+        |> run(transaction, data, Filter.Type.Cuisine.Region, fn path, file ->
+            name = Yum.Util.name(file)
+            group_count = length(Yum.Util.match_ref(file)) - 1
+
+            Yum.Data.reduce_cuisines([], fn
+                { _, %{ "translation" => translations, "type" => type } }, _, acc when type in ["province", "country", "subregion", "continent"] -> [{ String.to_atom(type), translations }|acc]
+                _, _, acc -> acc
+            end, "", path, Yum.Data.ref_filter(file))
         end)
     end
 
@@ -166,7 +181,7 @@ defmodule Fondant.Service.Filter.Data do
         end)
     end
 
-    @spec insert_translations(Ecto.Multi.t, String.t, module, %{ optional(atom) => Yum.Data.translation_tree }) :: Ecto.Multi.t
+    @spec insert_translations(Ecto.Multi.t, String.t, module, keyword(Yum.Data.translation_tree)) :: Ecto.Multi.t
     defp insert_translations(transaction, ref, type, translation_fields) do
         Enum.reduce(translation_fields, transaction, fn { translation_field, translations }, transaction ->
             translation_model = Module.safe_concat([type, Translation, atom_to_module(translation_field), Model])
@@ -195,7 +210,7 @@ defmodule Fondant.Service.Filter.Data do
         end)
     end
 
-    @spec run(Yum.Migration.t, Ecto.Multi.t, String.t, module, ((String.t, String.t) -> %{ optional(atom) => Yum.Data.translation_tree })) :: :ok | { :error, String.t }
+    @spec run(Yum.Migration.t, Ecto.Multi.t, String.t, module, ((String.t, String.t) -> keyword(Yum.Data.translation_tree))) :: :ok | { :error, String.t }
     defp run(migration, transaction, path, type, get_translations) do
         model = Module.safe_concat(type, Model)
 
