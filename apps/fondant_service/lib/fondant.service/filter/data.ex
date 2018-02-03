@@ -76,7 +76,7 @@ defmodule Fondant.Service.Filter.Data do
             |> migrate_allergens(timestamp, path)
             |> migrate_diets(timestamp, path)
             |> migrate_ingredients(timestamp, path)
-            |> migrate_cuisine_regions(timestamp, path)
+            |> migrate_cuisines(timestamp, path)
         end)
         |> Ecto.Multi.merge(fn changes ->
             timestamp = Enum.reduce(changes, -1, fn
@@ -138,10 +138,29 @@ defmodule Fondant.Service.Filter.Data do
         end)
     end
 
-    @spec migrate_cuisine_regions(Ecto.Multi.t, integer, String.t) :: Ecto.Multi.t
-    defp migrate_cuisine_regions(transaction, timestamp, data) do
-        get_migration(data, "cuisines", timestamp)
-        |> run(transaction, data, Filter.Type.Cuisine.Region, fn path, file ->
+    @spec migrate_cuisines(Ecto.Multi.t, integer, String.t) :: Ecto.Multi.t
+    defp migrate_cuisines(transaction, timestamp, data) do
+        migration = get_migration(data, "cuisines", timestamp)
+
+        # Unsafe if the type is changed from a cuisine vs region type over a
+        # migration. Converting to the new data store will fix that.
+        { region_add, dish_add } = Enum.reduce(migration.add, { [], [] }, fn { meta, ref }, { region, dish } ->
+            if Regex.match?(~r/^type\s=\s"dish"/, File.read!(Path.join([data, "cuisines", ref <> ".toml"]))) do
+                { region, [{ meta, ref }|dish] }
+            else
+                { [{ meta, ref }|region], dish }
+            end
+        end)
+
+        { region_update, dish_update } = Enum.reduce(migration.update, { [], [] }, fn ref, { region, dish } ->
+            if Regex.match?(~r/^type\s=\s"dish"/, File.read!(Path.join([data, "cuisines", ref <> ".toml"]))) do
+                { region, [ref|dish] }
+            else
+                { [ref|region], dish }
+            end
+        end)
+
+        run(%{ migration | add: region_add, update: region_update }, transaction, data, Filter.Type.Cuisine.Region, fn path, file ->
             name = Yum.Util.name(file)
             group_count = length(Yum.Util.match_ref(file)) - 1
 
@@ -149,6 +168,21 @@ defmodule Fondant.Service.Filter.Data do
                 { _, %{ "translation" => translations, "type" => type } }, _, acc when type in ["province", "country", "subregion", "continent"] -> [{ String.to_atom(type), translations }|acc]
                 _, _, acc -> acc
             end, "", path, Yum.Data.ref_filter(file))
+        end)
+        |> Ecto.Multi.merge(fn changes ->
+            run(%{ migration | add: dish_add, update: dish_update }, Ecto.Multi.new(), data, Filter.Type.Cuisine, fn path, file ->
+                Yum.Data.reduce_cuisines([], fn
+                    { _, %{ "translation" => translations, "type" => type } }, _, acc when type == "dish" -> [{ :name, translations }|acc]
+                    _, _, acc -> acc
+                end, "", path, &(&1 == file))
+            end, fn values, ref ->
+                ref = Enum.join(String.split(Yum.Util.group_ref(Enum.join([""|String.split(ref, "/", trim: true)], "/")), "/", trim: true), "/")
+
+                case changes[{ :add_ref, { ref, Filter.Type.Cuisine.Region.Model } }] do
+                    %{ id: id } -> [{ :region_id, id }|values]
+                    _ -> values
+                end
+            end)
         end)
     end
 
@@ -210,8 +244,8 @@ defmodule Fondant.Service.Filter.Data do
         end)
     end
 
-    @spec run(Yum.Migration.t, Ecto.Multi.t, String.t, module, ((String.t, String.t) -> keyword(Yum.Data.translation_tree))) :: :ok | { :error, String.t }
-    defp run(migration, transaction, path, type, get_translations) do
+    @spec run(Yum.Migration.t, Ecto.Multi.t, String.t, module, ((String.t, String.t) -> keyword(Yum.Data.translation_tree)), ((keyword(), String.t) -> keyword())) :: :ok | { :error, String.t }
+    defp run(migration, transaction, path, type, get_translations, finalise_inserts \\ fn values, _ -> values end) do
         model = Module.safe_concat(type, Model)
 
         Yum.Migration.transactions(migration)
@@ -222,13 +256,13 @@ defmodule Fondant.Service.Filter.Data do
 
                 delete_translations(transaction, ref, model)
                 |> insert_translations(ref, type, translation_fields)
-                |> Ecto.Multi.merge(&Ecto.Multi.update_all(Ecto.Multi.new(), { :update_ref, { ref, model } }, find_ref(ref, model), [set: [{ :updated_at, DateTime.utc_now }|translate_ids(&1, ref)]]))
+                |> Ecto.Multi.merge(&Ecto.Multi.update_all(Ecto.Multi.new(), { :update_ref, { ref, model } }, find_ref(ref, model), [set: [{ :updated_at, DateTime.utc_now }|finalise_inserts.(translate_ids(&1, ref), ref)]]))
             { :add, { id, ref } }, transaction ->
                 file = Enum.join([""|String.split(ref, "/", trim: true)], "/")
                 translation_fields = get_translations.(path, file)
 
                 insert_translations(transaction, ref, type, translation_fields)
-                |> Ecto.Multi.merge(&Ecto.Multi.insert(Ecto.Multi.new(), { :add_ref, { ref, model } }, model.changeset(struct(model), Map.merge(%{ ref: ref, ref_id: id }, Map.new(translate_ids(&1, ref))))))
+                |> Ecto.Multi.merge(&Ecto.Multi.insert(Ecto.Multi.new(), { :add_ref, { ref, model } }, model.changeset(struct(model), Map.merge(%{ ref: ref, ref_id: id }, Map.new(finalise_inserts.(translate_ids(&1, ref), ref))))))
             { :move, { old_ref, new_ref } }, transaction -> Ecto.Multi.update_all(transaction, { :move_ref, { { old_ref, new_ref }, model } }, find_ref(old_ref, model), [set: [ref: new_ref]])
             { :delete, ref }, transaction ->
                 delete_translations(transaction, ref, model)
