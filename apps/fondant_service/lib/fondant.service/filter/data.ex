@@ -58,6 +58,11 @@ defmodule Fondant.Service.Filter.Data do
         end, timestamp, path)
     end
 
+    @doc """
+      Migrate the database.
+
+      Migrates the database to the latest version of the dataset.
+    """
     @spec migrate(String.t) :: :ok | { :error, String.t }
     def migrate(path \\ "apps/fondant_service/priv/data") do
         Ecto.Multi.new()
