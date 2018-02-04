@@ -13,7 +13,7 @@ defmodule Fondant.Service.Filter.Data do
 
       Removes all filters and history of the dataset.
     """
-    @spec clean() :: :ok
+    @spec clean() :: :ok | { :error, String.t }
     def clean() do
         Ecto.Multi.new
         |> Ecto.Multi.delete_all(:delete_allergens, Filter.Type.Allergen.Model)
