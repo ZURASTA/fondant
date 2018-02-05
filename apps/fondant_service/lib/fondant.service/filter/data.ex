@@ -40,6 +40,73 @@ defmodule Fondant.Service.Filter.Data do
         end
     end
 
+    @doc """
+      Rollback the database.
+
+      Rollback the database to the previous version of the dataset
+    """
+    @spec rollback(String.t) :: :ok | { :error, String.t }
+    def rollback(path \\ "apps/fondant_service/priv/data") do
+        Ecto.Multi.new()
+        |> Ecto.Multi.run(:last_migration, fn _ ->
+            query = from Filter.Data.Model,
+                order_by: [desc: :id],
+                limit: 2
+
+            case Fondant.Service.Repo.all(query) do
+                migrations = [_, prev_migration = %{ timestamp: last_timestamp }] ->
+                    last_timestamp = String.to_integer(last_timestamp)
+
+                    [
+                        get_migration(path, "allergens", last_timestamp - 1).timestamp,
+                        get_migration(path, "diets", last_timestamp - 1).timestamp,
+                        get_migration(path, "ingredients", last_timestamp - 1).timestamp,
+                        get_migration(path, "cuisines", last_timestamp - 1).timestamp
+                    ]
+                    |> Enum.max
+                    |> case do
+                        timestamp when timestamp == last_timestamp -> { :ok, migrations }
+                        _ -> { :error, "Dataset doesn't match timestamp (#{last_timestamp})" }
+                    end
+                _ -> { :error, "Nothing to rollback to" }
+            end
+        end)
+        |> Ecto.Multi.merge(fn %{ last_migration: [cur_migration, _] } ->
+            Ecto.Multi.delete(Ecto.Multi.new(), :delete_last_migration, cur_migration)
+        end)
+        |> Ecto.Multi.delete_all(:delete_allergens, Filter.Type.Allergen.Model)
+        |> Ecto.Multi.delete_all(:delete_allergen_names, Filter.Type.Allergen.Translation.Name.Model)
+        |> Ecto.Multi.delete_all(:delete_cuisines, Filter.Type.Cuisine.Model)
+        |> Ecto.Multi.delete_all(:delete_cuisine_names, Filter.Type.Cuisine.Translation.Name.Model)
+        |> Ecto.Multi.delete_all(:delete_cuisine_regions, Filter.Type.Cuisine.Region.Model)
+        |> Ecto.Multi.delete_all(:delete_cuisine_region_continents, Filter.Type.Cuisine.Region.Translation.Continent.Model)
+        |> Ecto.Multi.delete_all(:delete_cuisine_region_subregions, Filter.Type.Cuisine.Region.Translation.Subregion.Model)
+        |> Ecto.Multi.delete_all(:delete_cuisine_region_countrys, Filter.Type.Cuisine.Region.Translation.Country.Model)
+        |> Ecto.Multi.delete_all(:delete_cuisine_region_provinces, Filter.Type.Cuisine.Region.Translation.Province.Model)
+        |> Ecto.Multi.delete_all(:delete_diets, Filter.Type.Diet.Model)
+        |> Ecto.Multi.delete_all(:delete_diet_names, Filter.Type.Diet.Translation.Name.Model)
+        |> Ecto.Multi.delete_all(:delete_ingredients, Filter.Type.Ingredient.Model)
+        |> Ecto.Multi.delete_all(:delete_ingredient_names, Filter.Type.Ingredient.Translation.Name.Model)
+        |> Ecto.Multi.delete_all(:delete_ingredient_types, Filter.Type.Ingredient.Translation.Type.Model)
+        |> migrate_allergens(-1, path)
+        |> migrate_diets(-1, path)
+        |> migrate_ingredients(-1, path)
+        |> migrate_cuisines(-1, path)
+        |> Fondant.Service.Repo.transaction
+        |> case do
+            { :ok, %{ last_migration: [%{ timestamp: from_timestamp }, %{ timestamp: to_timestamp }] } } ->
+                Logger.info("Rolled back from (#{from_timestamp}) to (#{to_timestamp})")
+                :ok
+            { :error, :last_migration, value, _ } ->
+                Logger.debug(inspect(value))
+                { :error, value }
+            { :error, operation, value, _ } ->
+                Logger.debug("change #{inspect(operation)}: #{inspect(value)}")
+                { :error, "Failed to rollback" }
+            _ -> { :error, "Failed to rollback" }
+        end
+    end
+
     @spec ref_id(integer, integer) :: Fondant.Filter.id
     defp ref_id(timestamp, index) when timestamp <= 4611686018427387903 and index <= 281474976710655, do: UUID.binary_to_string!(<<index :: 48, 4 :: 4, 0 :: 12, 2 :: 2, timestamp :: 62>>)
 
