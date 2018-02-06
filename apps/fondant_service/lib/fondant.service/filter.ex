@@ -33,6 +33,7 @@ defmodule Fondant.Service.Filter do
         Task.start(fn -> GenServer.reply(from, Filter.Type.queryables(type)) end)
         { :noreply, state }
     end
-    def handle_call({ :db, :clean }, _from, state), do: { :reply, Filter.Data.clean(), state }
     def handle_call({ :db, :migrate }, _from, state), do: { :reply, Filter.Data.migrate(), state }
+    def handle_call({ :db, :rollback }, _from, state), do: { :reply, Filter.Data.rollback(), state }
+    def handle_call({ :db, :clean }, _from, state), do: { :reply, Filter.Data.clean(), state }
 end
