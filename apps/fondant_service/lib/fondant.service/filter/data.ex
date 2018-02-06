@@ -111,7 +111,7 @@ defmodule Fondant.Service.Filter.Data do
     defp ref_id(timestamp, index) when timestamp <= 4611686018427387903 and index <= 281474976710655, do: UUID.binary_to_string!(<<index :: 48, 4 :: 4, 0 :: 12, 2 :: 2, timestamp :: 62>>)
 
     @spec get_migration(String.t, String.t, integer) :: Yum.Migration.t
-    def get_migration(path, type, timestamp \\ -1) do
+    defp get_migration(path, type, timestamp \\ -1) do
         Yum.Data.reduce_migrations(%Yum.Migration{}, type, fn
             migration = %{ "add" => add, "timestamp" => timestamp }, acc ->
                 timestamp = String.to_integer(timestamp)
