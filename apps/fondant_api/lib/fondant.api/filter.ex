@@ -21,9 +21,11 @@ defmodule Fondant.API.Filter do
     @doc """
       Rollback the database.
 
-      Rollback the database to the previous version of the dataset
+      Rollback the database to the previous version of the dataset.
+
+      If successful returns `:ok` and the current timestamp.
     """
-    @spec rollback() :: :ok | { :error, String.t }
+    @spec rollback() :: { :ok, integer } | { :error, String.t }
     def rollback() do
         GenServer.call(@service, { :db, :rollback })
     end
@@ -32,8 +34,10 @@ defmodule Fondant.API.Filter do
       Migrate the database.
 
       Migrates the database to the latest version of the dataset.
+
+      If successful returns `:ok` and the current timestamp.
     """
-    @spec migrate() :: :ok | { :error, String.t }
+    @spec migrate() :: { :ok, integer } | { :error, String.t }
     def migrate() do
         GenServer.call(@service, { :db, :migrate })
     end

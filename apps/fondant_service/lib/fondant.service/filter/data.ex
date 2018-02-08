@@ -45,7 +45,7 @@ defmodule Fondant.Service.Filter.Data do
 
       Rollback the database to the previous version of the dataset
     """
-    @spec rollback(String.t) :: :ok | { :error, String.t }
+    @spec rollback(String.t) :: { :ok, integer } | { :error, String.t }
     def rollback(path \\ "apps/fondant_service/priv/data") do
         Ecto.Multi.new()
         |> Ecto.Multi.run(:last_migration, fn _ ->
@@ -96,7 +96,7 @@ defmodule Fondant.Service.Filter.Data do
         |> case do
             { :ok, %{ last_migration: [%{ timestamp: from_timestamp }, %{ timestamp: to_timestamp }] } } ->
                 Logger.info("Rolled back from (#{from_timestamp}) to (#{to_timestamp})")
-                :ok
+                { :ok, String.to_integer(to_timestamp) }
             { :error, :last_migration, value, _ } ->
                 Logger.debug(inspect(value))
                 { :error, value }
@@ -130,7 +130,7 @@ defmodule Fondant.Service.Filter.Data do
 
       Migrates the database to the latest version of the dataset.
     """
-    @spec migrate(String.t) :: :ok | { :error, String.t }
+    @spec migrate(String.t) :: { :ok, integer } | { :error, String.t }
     def migrate(path \\ "apps/fondant_service/priv/data") do
         Ecto.Multi.new()
         |> Ecto.Multi.run(:last_migration, fn _ ->
@@ -166,7 +166,7 @@ defmodule Fondant.Service.Filter.Data do
         |> case do
             { :ok, changes } ->
                 Logger.info("Migrated from (#{changes[:last_migration]}) to (#{changes[:mark_migration].timestamp})")
-                :ok
+                { :ok, String.to_integer(changes[:mark_migration].timestamp) }
             { :error, :error_current, value, _ } ->
                 Logger.debug("change #{:error_current}: #{inspect(value)}")
                 { :error, value }
