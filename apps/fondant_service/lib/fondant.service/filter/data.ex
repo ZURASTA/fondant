@@ -357,4 +357,35 @@ defmodule Fondant.Service.Filter.Data do
         end)
         |> Enum.join(".")
     end
+
+    @doc """
+      Get a paginated list of migration timestamps.
+    """
+    @spec migrations(keyword()) :: { :ok, { [integer], Filter.Type.page } } | { :error, String.t }
+    def migrations(options \\ []) do
+        query = if options[:page] == nil do
+            from data in Filter.Data.Model,
+                limit: ^options[:limit],
+                order_by: [desc: :id],
+                select: %{
+                    timestamp: data.timestamp,
+                    page: data.id
+                }
+        else
+            from data in Filter.Data.Model,
+                limit: ^options[:limit],
+                where: data.id < ^options[:page],
+                order_by: [desc: :id],
+                select: %{
+                    timestamp: data.timestamp,
+                    page: data.id
+                }
+        end
+
+        case Fondant.Service.Repo.all(query) do
+            nil -> { :error, "Could not retrieve any migrations" }
+            [] -> { :ok, { [], options[:page] } }
+            result -> { :ok, { Enum.map(result, &String.to_integer(&1.timestamp)), List.last(result).page } }
+        end
+    end
 end
