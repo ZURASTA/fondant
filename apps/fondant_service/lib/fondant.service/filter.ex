@@ -34,6 +34,7 @@ defmodule Fondant.Service.Filter do
         { :noreply, state }
     end
     def handle_call({ :db, :migrate }, _from, state), do: { :reply, Filter.Data.migrate(), state }
+    def handle_call({ :db, :migrations, { options } }, _from, state), do: { :reply, Filter.Data.migrations(options), state }
     def handle_call({ :db, :rollback }, _from, state), do: { :reply, Filter.Data.rollback(), state }
     def handle_call({ :db, :clean }, _from, state), do: { :reply, Filter.Data.clean(), state }
 end
