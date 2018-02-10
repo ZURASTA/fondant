@@ -41,4 +41,12 @@ defmodule Fondant.API.Filter do
     def migrate() do
         GenServer.call(@service, { :db, :migrate })
     end
+
+    @doc """
+      Get a paginated list of migration timestamps.
+    """
+    @spec migrations(keyword()) :: { :ok, { [integer], page } } | { :error, String.t }
+    def migrations(options \\ []) do
+        GenServer.call(@service, { :db, :migrations, { options } })
+    end
 end
