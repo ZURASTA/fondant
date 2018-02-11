@@ -14,7 +14,8 @@ defmodule Fondant.Mixfile do
             docs: [
                 main: "fondant",
                 extras: [
-                    "README.md": [filename: "fondant", title: "Fondant"]
+                    "README.md": [filename: "fondant", title: "Fondant"],
+                    "overview.md": [filename: "overview", title: "Overview"]
                 ]
             ]
         ]
