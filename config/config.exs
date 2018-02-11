@@ -2,6 +2,17 @@
 # and its dependencies with the aid of the Mix.Config module.
 use Mix.Config
 
+if Mix.env == :dev do
+    import_config "simple_markdown_rules.exs"
+
+    config :ex_doc_simple_markdown, [
+        pretty_codeblocks: false,
+        rules: &SimpleMarkdownExtensionBlueprint.add_rule/1
+    ]
+
+    config :ex_doc, :markdown_processor, ExDocSimpleMarkdown
+end
+
 # By default, the umbrella project as well as each child
 # application will require this configuration file, ensuring
 # they all use the same configuration. While one could

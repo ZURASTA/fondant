@@ -6,7 +6,17 @@ defmodule Fondant.Mixfile do
             apps_path: "apps",
             build_embedded: Mix.env == :prod,
             start_permanent: Mix.env == :prod,
-            deps: deps()
+            aliases: aliases(),
+            deps: deps(),
+            dialyzer: [plt_add_deps: :transitive],
+            name: "Fondant",
+            source_url: "https://github.com/ZURASTA/fondant",
+            docs: [
+                main: "fondant",
+                extras: [
+                    "README.md": [filename: "fondant", title: "Fondant"]
+                ]
+            ]
         ]
     end
 
@@ -23,6 +33,22 @@ defmodule Fondant.Mixfile do
     # Dependencies listed here are available only for this project
     # and cannot be accessed from applications inside the apps folder
     defp deps do
-        []
+        [
+            { :ex_doc, "~> 0.18", only: :dev, runtime: false },
+            { :simple_markdown, "~> 0.5", only: :dev, runtime: false },
+            { :ex_doc_simple_markdown, "~> 0.2.1", only: :dev, runtime: false },
+            { :simple_markdown_extension_blueprint, "~> 0.2", only: :dev, runtime: false }
+        ]
+    end
+
+    defp aliases do
+        [docs: &build_docs/1]
+    end
+
+    defp build_docs(_) do
+        System.cmd("mix", ["compile"], env: [{ "MIX_ENV", "prod" }])
+
+        Mix.Tasks.Compile.run([])
+        Mix.Tasks.Docs.run([])
     end
 end
