@@ -26,7 +26,7 @@ defmodule Fondant.API.Filter.Diet do
 
       The query field accepts:
 
-      * ':any' - Search all fields
+      * `:any` - Search all fields
       * `:name` - Search all diet names
 
       The options field accepts:

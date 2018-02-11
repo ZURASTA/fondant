@@ -26,7 +26,7 @@ defmodule Fondant.API.Filter.Cuisine do
 
       The query field accepts:
 
-      * ':any' - Search all fields
+      * `:any` - Search all fields
       * `:name` - Search all cuisine names
       * `:region` - Search all cuisine regions by `[:id, :continent, :subregion, :country, :province]`
 

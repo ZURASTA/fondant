@@ -26,7 +26,7 @@ defmodule Fondant.API.Filter.Ingredient do
 
       The query field accepts:
 
-      * ':any' - Search all fields
+      * `:any` - Search all fields
       * `:name` - Search all ingredient names
       * `:type` - Search all ingredient types
 

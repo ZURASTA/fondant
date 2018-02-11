@@ -26,7 +26,7 @@ defmodule Fondant.API.Filter.Allergen do
 
       The query field accepts:
 
-      * ':any' - Search all fields
+      * `:any` - Search all fields
       * `:name` - Search all allergen names
 
       The options field accepts:
