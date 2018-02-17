@@ -37,18 +37,10 @@ defmodule Fondant.Service.Filter do
     def handle_call({ :db, :migrations, { options } }, _from, state), do: { :reply, Filter.Data.migrations(options), state }
     def handle_call({ :db, :rollback }, _from, state), do: { :reply, Filter.Data.rollback(), state }
     def handle_call({ :db, :clean }, _from, state), do: { :reply, Filter.Data.clean(), state }
-    def handle_call({ :swarm, :begin_handoff }, _from, state) do
-        { :reply, :restart, state }
-    end
+    def handle_call({ :swarm, :begin_handoff }, _from, state), do: { :reply, :restart, state }
 
-    def handle_cast({ :swarm, :end_handoff }, state) do
-        { :noreply, state }
-    end
-    def handle_cast({ :swarm, :resolve_conflict, _state }, state) do
-        { :noreply, state }
-    end
+    def handle_cast({ :swarm, :end_handoff }, state), do: { :noreply, state }
+    def handle_cast({ :swarm, :resolve_conflict, _state }, state), do: { :noreply, state }
 
-    def handle_info({ :swarm, :die }, state) do
-        { :stop, :shutdown, state }
-    end
+    def handle_info({ :swarm, :die }, state), do: { :stop, :shutdown, state }
 end
