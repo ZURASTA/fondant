@@ -83,14 +83,16 @@ defmodule Fondant.Service.Repo.Migrations.Locale.Seed do
     ]
 
     def change do
-        timestamp = DateTime.utc_now
-        codes = Enum.map(@codes, fn code ->
-            case String.split(code, "-") do
-                [language, country] -> [language: language, country: country, inserted_at: timestamp, updated_at: timestamp]
-                [language] -> [language: language, inserted_at: timestamp, updated_at: timestamp]
-            end
-        end)
+        if Mix.env != :test do
+            timestamp = DateTime.utc_now
+            codes = Enum.map(@codes, fn code ->
+                case String.split(code, "-") do
+                    [language, country] -> [language: language, country: country, inserted_at: timestamp, updated_at: timestamp]
+                    [language] -> [language: language, inserted_at: timestamp, updated_at: timestamp]
+                end
+            end)
 
-        Fondant.Service.Repo.insert_all(Fondant.Service.Locale.Model, codes)
+            Fondant.Service.Repo.insert_all(Fondant.Service.Locale.Model, codes)
+        end
     end
 end
