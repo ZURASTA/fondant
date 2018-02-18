@@ -1,6 +1,16 @@
 defmodule Fondant.Service do
     @moduledoc """
       The service application for translating filters.
+
+      ## Configurable Options
+
+      * `:server` - The name the server should be registered as. This takes a
+      function that accepts a module and returns a valid named server.
+
+      An example configuration:
+
+        config :fondant_service,
+            server: &(&1),
     """
 
     use Application

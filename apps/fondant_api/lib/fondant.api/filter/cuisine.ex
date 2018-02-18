@@ -13,12 +13,15 @@ defmodule Fondant.API.Filter.Cuisine do
 
       If no filter exists with the given id, it will return an error.
 
+      #{Fondant.API.option_docs}
+
       Returns `{ :ok, cuisine_filter }` if the operation was successful, otherwise returns
       an error.
     """
-    @spec get(integer, Filter.locale) :: { :ok, Fondant.Filter.Cuisine.t } | { :error, String.t }
-    def get(id, locale) do
-        GenServer.call(@service, { :get, { @filter_type, id, locale } })
+    @spec get(integer, Filter.locale, keyword(any)) :: { :ok, Fondant.Filter.Cuisine.t } | { :error, String.t }
+    def get(id, locale, options \\ []) do
+        options = Fondant.API.defaults(options)
+        GenServer.call(options[:server].(@service), { :get, { @filter_type, id, locale } }, options[:timeout])
     end
 
     @doc """
@@ -30,8 +33,7 @@ defmodule Fondant.API.Filter.Cuisine do
       * `:name` - Search all cuisine names
       * `:region` - Search all cuisine regions by `[:id, :continent, :subregion, :country, :province]`
 
-      The options field accepts:
-
+      #{Fondant.API.option_docs}
       * `:locale` - The localisation `t:Fondant.API.Filter.locale/0`
       to be applied for the search (see `Fondant.Service.Locale`).
       * `:page` - The pagination index to retrieve the results of.
@@ -43,14 +45,18 @@ defmodule Fondant.API.Filter.Cuisine do
     """
     @spec find(keyword(String.t), keyword(any)) :: { :ok, { [Fondant.Filter.Cuisine.t], Filter.page } } | { :error, String.t }
     def find(query, options \\ []) do
-        GenServer.call(@service, { :find, { @filter_type, query, options } })
+        options = Fondant.API.defaults(options)
+        GenServer.call(options[:server].(@service), { :find, { @filter_type, query, options } }, options[:timeout])
     end
 
     @doc """
       Get the list of queryable parameters that can be used in cuisine filter queries.
+
+      #{Fondant.API.option_docs}
     """
-    @spec queryables() :: [atom]
-    def queryables() do
-        GenServer.call(@service, { :queryables, { @filter_type } })
+    @spec queryables(keyword(any)) :: [atom]
+    def queryables(options \\ []) do
+        options = Fondant.API.defaults(options)
+        GenServer.call(options[:server].(@service), { :queryables, { @filter_type } }, options[:timeout])
     end
 end
