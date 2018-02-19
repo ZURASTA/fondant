@@ -10,7 +10,7 @@ defmodule Fondant.Service do
       An example configuration:
 
         config :fondant_service,
-            server: &(&1),
+            server: &(&1)
     """
 
     use Application
