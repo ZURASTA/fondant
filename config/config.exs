@@ -5,9 +5,14 @@ use Mix.Config
 if Mix.env == :dev do
     import_config "simple_markdown_rules.exs"
 
+    config :simple_markdown_extension_highlight_js,
+        source: Enum.at(Path.wildcard(Path.join(Mix.Project.deps_path(), "ex_doc/formatters/html/dist/*.js")), 0, "")
+
     config :ex_doc_simple_markdown, [
-        pretty_codeblocks: false,
-        rules: &SimpleMarkdownExtensionBlueprint.add_rule/1
+        rules: fn rules ->
+            :ok = SimpleMarkdownExtensionHighlightJS.setup
+            SimpleMarkdownExtensionBlueprint.add_rule(rules)
+        end
     ]
 
     config :ex_doc, :markdown_processor, ExDocSimpleMarkdown
