@@ -14,7 +14,7 @@ defmodule Fondant.Service.Mixfile do
             build_embedded: Mix.env == :prod,
             start_permanent: Mix.env == :prod,
             aliases: aliases(),
-            deps: deps(Mix.Project.umbrella?),
+            deps: deps(),
             dialyzer: [plt_add_deps: :transitive]
         ]
     end
@@ -46,8 +46,7 @@ defmodule Fondant.Service.Mixfile do
     #   {:my_app, in_umbrella: true}
     #
     # Type "mix help deps" for more examples and options
-    defp deps(false), do: deps(true) ++ [{ :fondant_filter, path: "../fondant_filter" }]
-    defp deps(true) do
+    defp deps() do
         [
             { :ecto, "~> 2.1" },
             { :postgrex, "~> 0.13.2" },
@@ -55,6 +54,7 @@ defmodule Fondant.Service.Mixfile do
             { :like_sanitizer, "~> 0.1" },
             { :yum, github: "ZURASTA/yum" },
             { :uuid, "~> 1.1" },
+            { :fondant_filter, in_umbrella: true },
             { :protecto, github: "ScrimpyCat/Protecto" },
             { :defecto, github: "ScrimpyCat/Defecto", only: :test }
         ]

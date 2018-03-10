@@ -10,9 +10,10 @@ defmodule Fondant.API.Mixfile do
             deps_path: "../../deps",
             lockfile: "../../mix.lock",
             elixir: "~> 1.5",
+            elixirc_paths: elixirc_paths(Mix.env),
             build_embedded: Mix.env == :prod,
             start_permanent: Mix.env == :prod,
-            deps: deps(Mix.Project.umbrella?)
+            deps: deps()
         ]
     end
 
@@ -22,6 +23,10 @@ defmodule Fondant.API.Mixfile do
     def application do
         [extra_applications: [:logger]]
     end
+
+    # Specifies which paths to compile per environment.
+    defp elixirc_paths(:test), do: ["lib", "test/support", "../fondant_service/test/support"]
+    defp elixirc_paths(_),     do: ["lib"]
 
     # Dependencies can be Hex packages:
     #
@@ -36,10 +41,10 @@ defmodule Fondant.API.Mixfile do
     #   {:my_app, in_umbrella: true}
     #
     # Type "mix help deps" for more examples and options
-    defp deps(false) do
+    defp deps() do
         [
-            { :fondant_service, path: "../fondant_service", only: :test }
+            { :fondant_filter, in_umbrella: true },
+            { :fondant_service, in_umbrella: true, only: :test }
         ]
     end
-    defp deps(true), do: []
 end
