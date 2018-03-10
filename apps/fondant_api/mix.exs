@@ -13,7 +13,8 @@ defmodule Fondant.API.Mixfile do
             elixirc_paths: elixirc_paths(Mix.env),
             build_embedded: Mix.env == :prod,
             start_permanent: Mix.env == :prod,
-            deps: deps()
+            deps: deps(),
+            dialyzer: [plt_add_deps: :transitive]
         ]
     end
 
