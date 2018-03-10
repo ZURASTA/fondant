@@ -316,7 +316,7 @@ defmodule Fondant.Service.Filter.Data do
         end)
     end
 
-    @spec run(Yum.Migration.t, Ecto.Multi.t, String.t, module, ((String.t, String.t) -> keyword(Yum.Data.translation_tree)), ((keyword(), String.t) -> keyword())) :: :ok | { :error, String.t }
+    @spec run(Yum.Migration.t, Ecto.Multi.t, String.t, module, ((String.t, String.t) -> keyword(Yum.Data.translation_tree)), ((keyword(), String.t) -> keyword())) :: Ecto.Multi.t
     defp run(migration, transaction, path, type, get_translations, finalise_inserts \\ fn values, _ -> values end) do
         model = Module.safe_concat(type, Model)
 
