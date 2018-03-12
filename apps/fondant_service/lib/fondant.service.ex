@@ -31,9 +31,7 @@ defmodule Fondant.Service do
         setup_mode = args[:setup_mode] || :auto
 
         if setup_mode == :auto do
-            if Mix.env == :test do
-                Fondant.Service.Repo.DB.drop()
-            end
+            prepare_db()
             Fondant.Service.Repo.DB.create()
         end
 
@@ -50,5 +48,11 @@ defmodule Fondant.Service do
         end
 
         supervisor
+    end
+
+    if Mix.env == :test do
+        defp prepare_db(), do: Fondant.Service.Repo.DB.drop()
+    else
+        defp prepare_db(), do: :ok
     end
 end
